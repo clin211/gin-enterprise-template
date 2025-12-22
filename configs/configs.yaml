@@ -14,7 +14,7 @@ postgresql:
   log-level: 4 # 日志级别
 redis: # Redis 数据库相关配置
   addr: 127.0.0.1:63790 # Redis 服务器地址和端口，默认 127.0.0.1:6379
-  username: ""# Redis 用户名（使用默认用户，留空）
+  username: "" # Redis 用户名（使用默认用户，留空）
   password: Q6jAu8trwDEcJN7V # Redis 用户密码
   database: 0 # Redis 数据库索引，默认 0
   max-retries: 3 # 最大重试次数，默认 3
