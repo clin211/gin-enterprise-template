@@ -7,12 +7,13 @@
 package v1
 
 import (
-	_ "github.com/onexstack/protoc-gen-defaults/defaults"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	_ "github.com/onexstack/protoc-gen-defaults/defaults"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -137,11 +138,7 @@ type LoginRequest struct {
 	// username 表示用户名称
 	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	// password 表示用户密码
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	// captchaID 表示验证码 ID
-	CaptchaID string `protobuf:"bytes,3,opt,name=captchaID,proto3" json:"captchaID,omitempty"`
-	// verifyCode 表示用户输入的验证码
-	VerifyCode    string `protobuf:"bytes,4,opt,name=verifyCode,proto3" json:"verifyCode,omitempty"`
+	Password      string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -190,29 +187,19 @@ func (x *LoginRequest) GetPassword() string {
 	return ""
 }
 
-func (x *LoginRequest) GetCaptchaID() string {
-	if x != nil {
-		return x.CaptchaID
-	}
-	return ""
-}
-
-func (x *LoginRequest) GetVerifyCode() string {
-	if x != nil {
-		return x.VerifyCode
-	}
-	return ""
-}
-
 // LoginResponse 表示登录响应
 type LoginResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// token 表示返回的身份验证令牌
+	// token 表示返回的访问令牌
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// expireAt 表示该 token 的过期时间
-	ExpireAt      int64 `protobuf:"varint,2,opt,name=expireAt,proto3" json:"expireAt,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// expireAt 表示该访问令牌的过期时间
+	ExpireAt int64 `protobuf:"varint,2,opt,name=expireAt,proto3" json:"expireAt,omitempty"`
+	// refreshToken 表示返回的刷新令牌
+	RefreshToken string `protobuf:"bytes,3,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
+	// refreshExpireAt 表示刷新令牌的过期时间
+	RefreshExpireAt int64 `protobuf:"varint,4,opt,name=refreshExpireAt,proto3" json:"refreshExpireAt,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *LoginResponse) Reset() {
@@ -259,6 +246,20 @@ func (x *LoginResponse) GetExpireAt() int64 {
 	return 0
 }
 
+func (x *LoginResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *LoginResponse) GetRefreshExpireAt() int64 {
+	if x != nil {
+		return x.RefreshExpireAt
+	}
+	return 0
+}
+
 // RefreshTokenRequest 表示刷新令牌的请求
 type RefreshTokenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -299,12 +300,16 @@ func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
 // RefreshTokenResponse 表示刷新令牌的响应
 type RefreshTokenResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// token 表示返回的身份验证令牌
+	// token 表示返回的访问令牌
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// expireAt 表示该 token 的过期时间
-	ExpireAt      int64 `protobuf:"varint,2,opt,name=expireAt,proto3" json:"expireAt,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// expireAt 表示该访问令牌的过期时间
+	ExpireAt int64 `protobuf:"varint,2,opt,name=expireAt,proto3" json:"expireAt,omitempty"`
+	// refreshToken 表示返回的刷新令牌
+	RefreshToken string `protobuf:"bytes,3,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
+	// refreshExpireAt 表示刷新令牌的过期时间
+	RefreshExpireAt int64 `protobuf:"varint,4,opt,name=refreshExpireAt,proto3" json:"refreshExpireAt,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *RefreshTokenResponse) Reset() {
@@ -347,6 +352,20 @@ func (x *RefreshTokenResponse) GetToken() string {
 func (x *RefreshTokenResponse) GetExpireAt() int64 {
 	if x != nil {
 		return x.ExpireAt
+	}
+	return 0
+}
+
+func (x *RefreshTokenResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *RefreshTokenResponse) GetRefreshExpireAt() int64 {
+	if x != nil {
+		return x.RefreshExpireAt
 	}
 	return 0
 }
@@ -988,98 +1007,6 @@ func (x *ListUserResponse) GetUsers() []*User {
 	return nil
 }
 
-// GetCaptchaRequest 表示获取验证码请求
-type GetCaptchaRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCaptchaRequest) Reset() {
-	*x = GetCaptchaRequest{}
-	mi := &file_apiserver_v1_user_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCaptchaRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCaptchaRequest) ProtoMessage() {}
-
-func (x *GetCaptchaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apiserver_v1_user_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCaptchaRequest.ProtoReflect.Descriptor instead.
-func (*GetCaptchaRequest) Descriptor() ([]byte, []int) {
-	return file_apiserver_v1_user_proto_rawDescGZIP(), []int{17}
-}
-
-// GetCaptchaResponse 表示获取验证码响应
-type GetCaptchaResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// captchaID 表示验证码 ID
-	CaptchaID string `protobuf:"bytes,1,opt,name=captchaID,proto3" json:"captchaID,omitempty"`
-	// captchaImage 表示验证码图片的 base64 编码
-	CaptchaImage  string `protobuf:"bytes,2,opt,name=captchaImage,proto3" json:"captchaImage,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCaptchaResponse) Reset() {
-	*x = GetCaptchaResponse{}
-	mi := &file_apiserver_v1_user_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCaptchaResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCaptchaResponse) ProtoMessage() {}
-
-func (x *GetCaptchaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apiserver_v1_user_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCaptchaResponse.ProtoReflect.Descriptor instead.
-func (*GetCaptchaResponse) Descriptor() ([]byte, []int) {
-	return file_apiserver_v1_user_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *GetCaptchaResponse) GetCaptchaID() string {
-	if x != nil {
-		return x.CaptchaID
-	}
-	return ""
-}
-
-func (x *GetCaptchaResponse) GetCaptchaImage() string {
-	if x != nil {
-		return x.CaptchaImage
-	}
-	return ""
-}
-
 var File_apiserver_v1_user_proto protoreflect.FileDescriptor
 
 const file_apiserver_v1_user_proto_rawDesc = "" +
@@ -1093,21 +1020,21 @@ const file_apiserver_v1_user_proto_rawDesc = "" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x1c\n" +
 	"\tpostCount\x18\x06 \x01(\x03R\tpostCount\x12\x1c\n" +
 	"\tcreatedAt\x18\a \x01(\x03R\tcreatedAt\x12\x1c\n" +
-	"\tupdatedAt\x18\b \x01(\x03R\tupdatedAt\"\x84\x01\n" +
+	"\tupdatedAt\x18\b \x01(\x03R\tupdatedAt\"F\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1c\n" +
-	"\tcaptchaID\x18\x03 \x01(\tR\tcaptchaID\x12\x1e\n" +
-	"\n" +
-	"verifyCode\x18\x04 \x01(\tR\n" +
-	"verifyCode\"A\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x8f\x01\n" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
-	"\bexpireAt\x18\x02 \x01(\x03R\bexpireAt\"\x15\n" +
-	"\x13RefreshTokenRequest\"H\n" +
+	"\bexpireAt\x18\x02 \x01(\x03R\bexpireAt\x12\"\n" +
+	"\frefreshToken\x18\x03 \x01(\tR\frefreshToken\x12(\n" +
+	"\x0frefreshExpireAt\x18\x04 \x01(\x03R\x0frefreshExpireAt\"\x15\n" +
+	"\x13RefreshTokenRequest\"\x96\x01\n" +
 	"\x14RefreshTokenResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
-	"\bexpireAt\x18\x02 \x01(\x03R\bexpireAt\"s\n" +
+	"\bexpireAt\x18\x02 \x01(\x03R\bexpireAt\x12\"\n" +
+	"\frefreshToken\x18\x03 \x01(\tR\frefreshToken\x12(\n" +
+	"\x0frefreshExpireAt\x18\x04 \x01(\x03R\x0frefreshExpireAt\"s\n" +
 	"\x15ChangePasswordRequest\x12\x16\n" +
 	"\x06userID\x18\x01 \x01(\tR\x06userID\x12 \n" +
 	"\voldPassword\x18\x02 \x01(\tR\voldPassword\x12 \n" +
@@ -1147,11 +1074,7 @@ const file_apiserver_v1_user_proto_rawDesc = "" +
 	"\n" +
 	"totalCount\x18\x01 \x01(\x03R\n" +
 	"totalCount\x12(\n" +
-	"\x05users\x18\x02 \x03(\v2\x12.apiserver.v1.UserR\x05users\"\x13\n" +
-	"\x11GetCaptchaRequest\"V\n" +
-	"\x12GetCaptchaResponse\x12\x1c\n" +
-	"\tcaptchaID\x18\x01 \x01(\tR\tcaptchaID\x12\"\n" +
-	"\fcaptchaImage\x18\x02 \x01(\tR\fcaptchaImageBDZBgithub.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1;v1b\x06proto3"
+	"\x05users\x18\x02 \x03(\v2\x12.apiserver.v1.UserR\x05usersBDZBgithub.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1;v1b\x06proto3"
 
 var (
 	file_apiserver_v1_user_proto_rawDescOnce sync.Once
@@ -1165,7 +1088,7 @@ func file_apiserver_v1_user_proto_rawDescGZIP() []byte {
 	return file_apiserver_v1_user_proto_rawDescData
 }
 
-var file_apiserver_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_apiserver_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_apiserver_v1_user_proto_goTypes = []any{
 	(*User)(nil),                   // 0: apiserver.v1.User
 	(*LoginRequest)(nil),           // 1: apiserver.v1.LoginRequest
@@ -1184,8 +1107,6 @@ var file_apiserver_v1_user_proto_goTypes = []any{
 	(*GetUserResponse)(nil),        // 14: apiserver.v1.GetUserResponse
 	(*ListUserRequest)(nil),        // 15: apiserver.v1.ListUserRequest
 	(*ListUserResponse)(nil),       // 16: apiserver.v1.ListUserResponse
-	(*GetCaptchaRequest)(nil),      // 17: apiserver.v1.GetCaptchaRequest
-	(*GetCaptchaResponse)(nil),     // 18: apiserver.v1.GetCaptchaResponse
 }
 var file_apiserver_v1_user_proto_depIdxs = []int32{
 	0, // 0: apiserver.v1.GetUserResponse.user:type_name -> apiserver.v1.User
@@ -1210,7 +1131,7 @@ func file_apiserver_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apiserver_v1_user_proto_rawDesc), len(file_apiserver_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"database/sql"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -21,17 +22,24 @@ type MySQLOptions struct {
 	MaxConnectionLifeTime time.Duration
 	// +optional
 	Logger logger.Interface
+	// +optional
+	// Location 指定时区，默认为 Local
+	Location string
 }
 
 // DSN return DSN from MySQLOptions.
 func (o *MySQLOptions) DSN() string {
+	loc := o.Location
+	if loc == "" {
+		loc = "Local"
+	}
 	return fmt.Sprintf(`%s:%s@tcp(%s)/%s?charset=utf8&parseTime=%t&loc=%s`,
 		o.Username,
 		o.Password,
 		o.Addr,
 		o.Database,
 		true,
-		"Local")
+		loc)
 }
 
 // NewMySQL create a new gorm db instance with the given options.
@@ -46,12 +54,12 @@ func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
 		Logger:      opts.Logger,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open mysql: %w", err)
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
 	// SetMaxOpenConns sets the maximum number of open connections to the database.
@@ -83,12 +91,28 @@ func setMySQLDefaults(opts *MySQLOptions) {
 	if opts.Logger == nil {
 		opts.Logger = logger.Default
 	}
+	if opts.Location == "" {
+		opts.Location = "Local"
+	}
 }
 
+// MustRawDB 获取底层的 *sql.DB，如果出错则 panic。
+// 注意：此函数设计用于程序启动时的配置验证阶段，
+// 此时如果发生错误通常表示配置严重错误，程序应该终止。
+// 如果需要更安全的错误处理，请使用 db.DB() 方法。
 func MustRawDB(db *gorm.DB) *sql.DB {
 	raw, err := db.DB()
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to get raw DB: %w", err))
 	}
 	return raw
+}
+
+// RawDB 获取底层的 *sql.DB，返回错误。
+func RawDB(db *gorm.DB) (*sql.DB, error) {
+	raw, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get raw DB: %w", err)
+	}
+	return raw, nil
 }

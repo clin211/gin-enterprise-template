@@ -32,18 +32,18 @@ message LoginRequest {
     string username = 1;
     // password 表示用户密码
     string password = 2;
-    // captchaID 表示验证码 ID
-    string captchaID = 3;
-    // verifyCode 表示用户输入的验证码
-    string verifyCode = 4;
 }
 
 // LoginResponse 表示登录响应
 message LoginResponse {
-    // token 表示返回的身份验证令牌
+    // token 表示返回的访问令牌
     string token = 1;
-    // expireAt 表示该 token 的过期时间
+    // expireAt 表示该访问令牌的过期时间
     int64 expireAt = 2;
+    // refreshToken 表示返回的刷新令牌
+    string refreshToken = 3;
+    // refreshExpireAt 表示刷新令牌的过期时间
+    int64 refreshExpireAt = 4;
 }
 
 // RefreshTokenRequest 表示刷新令牌的请求
@@ -53,10 +53,14 @@ message RefreshTokenRequest {
 
 // RefreshTokenResponse 表示刷新令牌的响应
 message RefreshTokenResponse {
-    // token 表示返回的身份验证令牌
+    // token 表示返回的访问令牌
     string token = 1;
-    // expireAt 表示该 token 的过期时间
+    // expireAt 表示该访问令牌的过期时间
     int64 expireAt = 2;
+    // refreshToken 表示返回的刷新令牌
+    string refreshToken = 3;
+    // refreshExpireAt 表示刷新令牌的过期时间
+    int64 refreshExpireAt = 4;
 }
 
 // ChangePasswordRequest 表示修改密码请求
@@ -151,17 +155,5 @@ message ListUserResponse {
     int64 totalCount = 1;
     // users 表示用户列表
     repeated User users = 2;
-}
-
-// GetCaptchaRequest 表示获取验证码请求
-message GetCaptchaRequest {
-}
-
-// GetCaptchaResponse 表示获取验证码响应
-message GetCaptchaResponse {
-    // captchaID 表示验证码 ID
-    string captchaID = 1;
-    // captchaImage 表示验证码图片的 base64 编码
-    string captchaImage = 2;
 }
 

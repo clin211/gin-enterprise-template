@@ -27,11 +27,7 @@ func NewServer(config *Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := ProvideRedis(config)
-	if err != nil {
-		return nil, err
-	}
-	bizBiz := biz.NewBiz(datastore, authzAuthz, client)
+	bizBiz := biz.NewBiz(datastore, authzAuthz)
 	validator := validation.New(datastore)
 	userRetriever := &UserRetriever{
 		store: datastore,

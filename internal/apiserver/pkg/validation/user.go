@@ -57,18 +57,6 @@ func (v *Validator) ValidateUserRules() genericvalidation.Rules {
 		"Offset": func(value any) error {
 			return nil
 		},
-		"CaptchaID": func(value any) error {
-			if value.(string) == "" {
-				return errno.ErrInvalidArgument.WithMessage("captchaID cannot be empty")
-			}
-			return nil
-		},
-		"VerifyCode": func(value any) error {
-			if value.(string) == "" {
-				return errno.ErrInvalidArgument.WithMessage("verifyCode cannot be empty")
-			}
-			return nil
-		},
 	}
 }
 
@@ -115,4 +103,3 @@ func (v *Validator) ValidateGetUserRequest(ctx context.Context, rq *v1.GetUserRe
 func (v *Validator) ValidateListUserRequest(ctx context.Context, rq *v1.ListUserRequest) error {
 	return genericvalidation.ValidateAllFields(rq, v.ValidateUserRules())
 }
-

@@ -26,30 +26,6 @@
     "application/json"
   ],
   "paths": {
-    "/captcha": {
-      "get": {
-        "summary": "获取图形验证码",
-        "description": "生成并返回图形验证码",
-        "operationId": "BlogService_GetCaptcha",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetCaptchaResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "验证码"
-        ]
-      }
-    },
     "/healthz": {
       "get": {
         "summary": "健康检查",
@@ -412,20 +388,6 @@
       "type": "object",
       "title": "DeleteUserResponse 表示删除用户响应"
     },
-    "v1GetCaptchaResponse": {
-      "type": "object",
-      "properties": {
-        "captchaID": {
-          "type": "string",
-          "title": "captchaID 表示验证码 ID"
-        },
-        "captchaImage": {
-          "type": "string",
-          "title": "captchaImage 表示验证码图片的 base64 编码"
-        }
-      },
-      "title": "GetCaptchaResponse 表示获取验证码响应"
-    },
     "v1GetUserResponse": {
       "type": "object",
       "properties": {
@@ -487,14 +449,6 @@
         "password": {
           "type": "string",
           "title": "password 表示用户密码"
-        },
-        "captchaID": {
-          "type": "string",
-          "title": "captchaID 表示验证码 ID"
-        },
-        "verifyCode": {
-          "type": "string",
-          "title": "verifyCode 表示用户输入的验证码"
         }
       },
       "title": "LoginRequest 表示登录请求"
@@ -504,12 +458,21 @@
       "properties": {
         "token": {
           "type": "string",
-          "title": "token 表示返回的身份验证令牌"
+          "title": "token 表示返回的访问令牌"
         },
         "expireAt": {
           "type": "string",
           "format": "int64",
-          "title": "expireAt 表示该 token 的过期时间"
+          "title": "expireAt 表示该访问令牌的过期时间"
+        },
+        "refreshToken": {
+          "type": "string",
+          "title": "refreshToken 表示返回的刷新令牌"
+        },
+        "refreshExpireAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "refreshExpireAt 表示刷新令牌的过期时间"
         }
       },
       "title": "LoginResponse 表示登录响应"
@@ -524,12 +487,21 @@
       "properties": {
         "token": {
           "type": "string",
-          "title": "token 表示返回的身份验证令牌"
+          "title": "token 表示返回的访问令牌"
         },
         "expireAt": {
           "type": "string",
           "format": "int64",
-          "title": "expireAt 表示该 token 的过期时间"
+          "title": "expireAt 表示该访问令牌的过期时间"
+        },
+        "refreshToken": {
+          "type": "string",
+          "title": "refreshToken 表示返回的刷新令牌"
+        },
+        "refreshExpireAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "refreshExpireAt 表示刷新令牌的过期时间"
         }
       },
       "title": "RefreshTokenResponse 表示刷新令牌的响应"

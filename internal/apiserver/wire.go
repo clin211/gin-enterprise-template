@@ -4,8 +4,8 @@
 package apiserver
 
 import (
-	"github.com/google/wire"
 	"github.com/clin211/gin-enterprise-template/pkg/authz"
+	"github.com/google/wire"
 
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/biz"
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/pkg/validation"
@@ -21,7 +21,6 @@ func NewServer(*Config) (*Server, error) {
 		wire.Struct(new(Server), "*"),
 		wire.NewSet(store.ProviderSet, biz.ProviderSet),
 		ProvideDB, // 提供数据库实例
-		ProvideRedis, // 提供Redis实例，供 biz 层使用
 		validation.ProviderSet,
 		wire.NewSet(
 			wire.Struct(new(UserRetriever), "*"),

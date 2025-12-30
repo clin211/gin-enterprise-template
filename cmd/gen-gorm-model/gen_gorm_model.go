@@ -41,7 +41,7 @@ var generateConfigs = map[string]GenerateConfig{
 
 // 命令行参数.
 var (
-	addr       = "127.0.0.1:54321"
+	addr       = "127.0.0.1:5432"
 	username   = "postgres"
 	password   = "postgres"
 	database   = "cs-pedia"
@@ -170,21 +170,7 @@ func GenerateCspediaModels(g *gen.Generator) {
 	g.GenerateModelAs("user", "UserM")
 	g.GenerateModelAs("user_config", "UserConfigM")
 	g.GenerateModelAs("user_login_log", "UserLoginLogM")
-	g.GenerateModelAs("monitor", "MonitorM")
 
 	// 权限控制表
 	g.GenerateModelAs("casbin_rule", "CasbinRuleM")
-
-	// 业务核心表
-	g.GenerateModelAs("project", "ProjectM")
-	g.GenerateModelAs("brand", "BrandM")
-	g.GenerateModelAs("evidence_block", "EvidenceBlockM")
-
-	// 任务相关表
-	g.GenerateModelAs("task", "TaskM")
-	g.GenerateModelAs("task_brand", "TaskBrandM")
-	g.GenerateModelAs("task_evidence_block", "TaskEvidenceBlockM")
-
-	// 内容表
-	g.GenerateModelAs("article", "ArticleM")
 }

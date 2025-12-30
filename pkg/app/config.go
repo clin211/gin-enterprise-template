@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log/slog"
 	"path/filepath"
 	"strings"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/util/homedir"
-	"k8s.io/klog/v2"
 )
 
 const configFlagName = "config"
@@ -50,14 +50,19 @@ func AddConfigFlag(fs *pflag.FlagSet, name string, watch bool) {
 		}
 
 		if err := viper.ReadInConfig(); err != nil {
-			klog.V(2).InfoS("Failed to read configuration file", "file", cfgFile, "err", err)
+			slog.LogAttrs(nil, slog.LevelDebug, "Failed to read configuration file",
+				slog.String("file", cfgFile),
+				slog.Any("err", err))
+		} else {
+			slog.LogAttrs(nil, slog.LevelDebug, "Success to read configuration file",
+				slog.String("file", viper.ConfigFileUsed()))
 		}
-		klog.V(2).InfoS("Success to read configuration file", "file", viper.ConfigFileUsed())
 
 		if watch {
 			viper.WatchConfig()
 			viper.OnConfigChange(func(e fsnotify.Event) {
-				klog.V(2).InfoS("Config file changed", "name", e.Name)
+				slog.LogAttrs(nil, slog.LevelInfo, "Config file changed",
+					slog.String("name", e.Name))
 			})
 		}
 	})
@@ -65,7 +70,7 @@ func AddConfigFlag(fs *pflag.FlagSet, name string, watch bool) {
 
 func PrintConfig() {
 	for _, key := range viper.AllKeys() {
-		klog.V(2).InfoS(fmt.Sprintf("CFG: %s=%v", key, viper.Get(key)))
+		slog.LogAttrs(nil, slog.LevelDebug, fmt.Sprintf("CFG: %s=%v", key, viper.Get(key)))
 	}
 }
 

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"log/slog"
 	"net"
 
 	"google.golang.org/grpc"
@@ -9,7 +10,6 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
-	"k8s.io/klog/v2"
 
 	genericoptions "github.com/clin211/gin-enterprise-template/pkg/options"
 )
@@ -29,7 +29,7 @@ func NewGRPCServer(
 ) (*GRPCServer, error) {
 	lis, err := net.Listen("tcp", grpcOptions.Addr)
 	if err != nil {
-		klog.ErrorS(err, "Failed to listen")
+		slog.Error("Failed to listen", "err", err)
 		return nil, err
 	}
 
@@ -53,15 +53,17 @@ func NewGRPCServer(
 
 // RunOrDie 启动 GRPC 服务器并在出错时记录致命错误.
 func (s *GRPCServer) RunOrDie() {
-	klog.InfoS("Start to listening the incoming requests", "protocol", "grpc", "addr", s.lis.Addr().String())
+	slog.Info("Start to listening the incoming requests",
+		"protocol", "grpc",
+		"addr", s.lis.Addr().String())
 	if err := s.srv.Serve(s.lis); err != nil {
-		klog.Fatalf("Failed to serve grpc server: %v", err)
+		slog.Error("Failed to serve grpc server", "err", err)
 	}
 }
 
 // GracefulStop 优雅地关闭 GRPC 服务器.
 func (s *GRPCServer) GracefulStop(ctx context.Context) {
-	klog.InfoS("Gracefully stop grpc server")
+	slog.Info("Gracefully stop grpc server")
 	s.srv.GracefulStop()
 }
 

@@ -25,8 +25,8 @@ func TestBizErrorWithMethods(t *testing.T) {
 		WithMetadata(map[string]interface{}{
 			"current_balance": 0.00,
 			"required_amount": 99.99,
-			"retry_after": 300,
-			"help_url": "https://example.com/help/balance",
+			"retry_after":     300,
+			"help_url":        "https://example.com/help/balance",
 		})
 
 	assert.Equal(t, "当前余额：0.00，需要：99.99", err.Details)
@@ -81,8 +81,8 @@ func TestBizErrorWithMessageAndMetadata(t *testing.T) {
 
 func TestGetErrorLevel(t *testing.T) {
 	tests := []struct {
-		code    BizCode
-		level   int
+		code  BizCode
+		level int
 	}{
 		{CodeInternalServer, LevelSystem},
 		{CodeUserNotFound, LevelUser},
@@ -177,9 +177,9 @@ func TestFromError(t *testing.T) {
 func TestErrorCompatibility(t *testing.T) {
 	// 测试旧版本错误的兼容性
 	oldErr := &ErrorXCompat{
-		Code:    http.StatusNotFound,
-		Reason:  "User.NotFound",
-		Message: "User not found.",
+		Code:     http.StatusNotFound,
+		Reason:   "User.NotFound",
+		Message:  "User not found.",
 		Metadata: map[string]string{"user_id": "12345"},
 	}
 

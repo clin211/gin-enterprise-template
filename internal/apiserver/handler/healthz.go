@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/clin211/gin-enterprise-template/pkg/core"
 	"github.com/clin211/gin-enterprise-template/pkg/version"
+	"github.com/gin-gonic/gin"
 
 	v1 "github.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1"
 )

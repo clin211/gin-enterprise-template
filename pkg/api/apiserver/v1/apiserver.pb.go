@@ -7,13 +7,14 @@
 package v1
 
 import (
+	reflect "reflect"
+	unsafe "unsafe"
+
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	reflect "reflect"
-	unsafe "unsafe"
 )
 
 const (
@@ -27,15 +28,12 @@ var File_apiserver_v1_apiserver_proto protoreflect.FileDescriptor
 
 const file_apiserver_v1_apiserver_proto_rawDesc = "" +
 	"\n" +
-	"\x1capiserver/v1/apiserver.proto\x12\fapiserver.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\x1aapiserver/v1/healthz.proto\x1a\x17apiserver/v1/user.proto2\xf9\v\n" +
+	"\x1capiserver/v1/apiserver.proto\x12\fapiserver.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\x1aapiserver/v1/healthz.proto\x1a\x17apiserver/v1/user.proto2\xd0\n" +
+	"\n" +
 	"\vBlogService\x12\x91\x01\n" +
 	"\aHealthz\x12\x16.google.protobuf.Empty\x1a\x1d.apiserver.v1.HealthzResponse\"O\x92A<\n" +
 	"\f服务治理\x12\f健康检查\x1a\x1e检查服务是否健康运行\x82\xd3\xe4\x93\x02\n" +
-	"\x12\b/healthz\x12\xa6\x01\n" +
-	"\n" +
-	"GetCaptcha\x12\x1f.apiserver.v1.GetCaptchaRequest\x1a .apiserver.v1.GetCaptchaResponse\"U\x92AB\n" +
-	"\t验证码\x12\x15获取图形验证码\x1a\x1e生成并返回图形验证码\x82\xd3\xe4\x93\x02\n" +
-	"\x12\b/captcha\x12\xa4\x01\n" +
+	"\x12\b/healthz\x12\xa4\x01\n" +
 	"\x05Login\x12\x1a.apiserver.v1.LoginRequest\x1a\x1b.apiserver.v1.LoginResponse\"b\x92AN\n" +
 	"\f用户认证\x12\f用户登录\x1a0用户使用用户名和密码进行登录认证\x82\xd3\xe4\x93\x02\v:\x01*\"\x06/login\x12\xc1\x01\n" +
 	"\fRefreshToken\x12!.apiserver.v1.RefreshTokenRequest\x1a\".apiserver.v1.RefreshTokenResponse\"j\x92AN\n" +
@@ -66,45 +64,41 @@ const file_apiserver_v1_apiserver_proto_rawDesc = "" +
 
 var file_apiserver_v1_apiserver_proto_goTypes = []any{
 	(*emptypb.Empty)(nil),        // 0: google.protobuf.Empty
-	(*GetCaptchaRequest)(nil),    // 1: apiserver.v1.GetCaptchaRequest
-	(*LoginRequest)(nil),         // 2: apiserver.v1.LoginRequest
-	(*RefreshTokenRequest)(nil),  // 3: apiserver.v1.RefreshTokenRequest
-	(*CreateUserRequest)(nil),    // 4: apiserver.v1.CreateUserRequest
-	(*GetUserRequest)(nil),       // 5: apiserver.v1.GetUserRequest
-	(*UpdateUserRequest)(nil),    // 6: apiserver.v1.UpdateUserRequest
-	(*DeleteUserRequest)(nil),    // 7: apiserver.v1.DeleteUserRequest
-	(*ListUserRequest)(nil),      // 8: apiserver.v1.ListUserRequest
-	(*HealthzResponse)(nil),      // 9: apiserver.v1.HealthzResponse
-	(*GetCaptchaResponse)(nil),   // 10: apiserver.v1.GetCaptchaResponse
-	(*LoginResponse)(nil),        // 11: apiserver.v1.LoginResponse
-	(*RefreshTokenResponse)(nil), // 12: apiserver.v1.RefreshTokenResponse
-	(*CreateUserResponse)(nil),   // 13: apiserver.v1.CreateUserResponse
-	(*GetUserResponse)(nil),      // 14: apiserver.v1.GetUserResponse
-	(*UpdateUserResponse)(nil),   // 15: apiserver.v1.UpdateUserResponse
-	(*DeleteUserResponse)(nil),   // 16: apiserver.v1.DeleteUserResponse
-	(*ListUserResponse)(nil),     // 17: apiserver.v1.ListUserResponse
+	(*LoginRequest)(nil),         // 1: apiserver.v1.LoginRequest
+	(*RefreshTokenRequest)(nil),  // 2: apiserver.v1.RefreshTokenRequest
+	(*CreateUserRequest)(nil),    // 3: apiserver.v1.CreateUserRequest
+	(*GetUserRequest)(nil),       // 4: apiserver.v1.GetUserRequest
+	(*UpdateUserRequest)(nil),    // 5: apiserver.v1.UpdateUserRequest
+	(*DeleteUserRequest)(nil),    // 6: apiserver.v1.DeleteUserRequest
+	(*ListUserRequest)(nil),      // 7: apiserver.v1.ListUserRequest
+	(*HealthzResponse)(nil),      // 8: apiserver.v1.HealthzResponse
+	(*LoginResponse)(nil),        // 9: apiserver.v1.LoginResponse
+	(*RefreshTokenResponse)(nil), // 10: apiserver.v1.RefreshTokenResponse
+	(*CreateUserResponse)(nil),   // 11: apiserver.v1.CreateUserResponse
+	(*GetUserResponse)(nil),      // 12: apiserver.v1.GetUserResponse
+	(*UpdateUserResponse)(nil),   // 13: apiserver.v1.UpdateUserResponse
+	(*DeleteUserResponse)(nil),   // 14: apiserver.v1.DeleteUserResponse
+	(*ListUserResponse)(nil),     // 15: apiserver.v1.ListUserResponse
 }
 var file_apiserver_v1_apiserver_proto_depIdxs = []int32{
 	0,  // 0: apiserver.v1.BlogService.Healthz:input_type -> google.protobuf.Empty
-	1,  // 1: apiserver.v1.BlogService.GetCaptcha:input_type -> apiserver.v1.GetCaptchaRequest
-	2,  // 2: apiserver.v1.BlogService.Login:input_type -> apiserver.v1.LoginRequest
-	3,  // 3: apiserver.v1.BlogService.RefreshToken:input_type -> apiserver.v1.RefreshTokenRequest
-	4,  // 4: apiserver.v1.BlogService.CreateUser:input_type -> apiserver.v1.CreateUserRequest
-	5,  // 5: apiserver.v1.BlogService.GetUser:input_type -> apiserver.v1.GetUserRequest
-	6,  // 6: apiserver.v1.BlogService.UpdateUser:input_type -> apiserver.v1.UpdateUserRequest
-	7,  // 7: apiserver.v1.BlogService.DeleteUser:input_type -> apiserver.v1.DeleteUserRequest
-	8,  // 8: apiserver.v1.BlogService.ListUsers:input_type -> apiserver.v1.ListUserRequest
-	9,  // 9: apiserver.v1.BlogService.Healthz:output_type -> apiserver.v1.HealthzResponse
-	10, // 10: apiserver.v1.BlogService.GetCaptcha:output_type -> apiserver.v1.GetCaptchaResponse
-	11, // 11: apiserver.v1.BlogService.Login:output_type -> apiserver.v1.LoginResponse
-	12, // 12: apiserver.v1.BlogService.RefreshToken:output_type -> apiserver.v1.RefreshTokenResponse
-	13, // 13: apiserver.v1.BlogService.CreateUser:output_type -> apiserver.v1.CreateUserResponse
-	14, // 14: apiserver.v1.BlogService.GetUser:output_type -> apiserver.v1.GetUserResponse
-	15, // 15: apiserver.v1.BlogService.UpdateUser:output_type -> apiserver.v1.UpdateUserResponse
-	16, // 16: apiserver.v1.BlogService.DeleteUser:output_type -> apiserver.v1.DeleteUserResponse
-	17, // 17: apiserver.v1.BlogService.ListUsers:output_type -> apiserver.v1.ListUserResponse
-	9,  // [9:18] is the sub-list for method output_type
-	0,  // [0:9] is the sub-list for method input_type
+	1,  // 1: apiserver.v1.BlogService.Login:input_type -> apiserver.v1.LoginRequest
+	2,  // 2: apiserver.v1.BlogService.RefreshToken:input_type -> apiserver.v1.RefreshTokenRequest
+	3,  // 3: apiserver.v1.BlogService.CreateUser:input_type -> apiserver.v1.CreateUserRequest
+	4,  // 4: apiserver.v1.BlogService.GetUser:input_type -> apiserver.v1.GetUserRequest
+	5,  // 5: apiserver.v1.BlogService.UpdateUser:input_type -> apiserver.v1.UpdateUserRequest
+	6,  // 6: apiserver.v1.BlogService.DeleteUser:input_type -> apiserver.v1.DeleteUserRequest
+	7,  // 7: apiserver.v1.BlogService.ListUsers:input_type -> apiserver.v1.ListUserRequest
+	8,  // 8: apiserver.v1.BlogService.Healthz:output_type -> apiserver.v1.HealthzResponse
+	9,  // 9: apiserver.v1.BlogService.Login:output_type -> apiserver.v1.LoginResponse
+	10, // 10: apiserver.v1.BlogService.RefreshToken:output_type -> apiserver.v1.RefreshTokenResponse
+	11, // 11: apiserver.v1.BlogService.CreateUser:output_type -> apiserver.v1.CreateUserResponse
+	12, // 12: apiserver.v1.BlogService.GetUser:output_type -> apiserver.v1.GetUserResponse
+	13, // 13: apiserver.v1.BlogService.UpdateUser:output_type -> apiserver.v1.UpdateUserResponse
+	14, // 14: apiserver.v1.BlogService.DeleteUser:output_type -> apiserver.v1.DeleteUserResponse
+	15, // 15: apiserver.v1.BlogService.ListUsers:output_type -> apiserver.v1.ListUserResponse
+	8,  // [8:16] is the sub-list for method output_type
+	0,  // [0:8] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

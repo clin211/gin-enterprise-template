@@ -24,8 +24,8 @@ type JWTOptions struct {
 // NewJWTOptions creates a JWTOptions object with default parameters.
 func NewJWTOptions() *JWTOptions {
 	return &JWTOptions{
-		Secret:           "9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8",
-		AccessExpiration: 2 * time.Hour,
+		Secret:            "9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8",
+		AccessExpiration:  2 * time.Hour,
 		RefreshExpiration: 168 * time.Hour, // 7 days
 	}
 }

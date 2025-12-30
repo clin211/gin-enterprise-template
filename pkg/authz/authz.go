@@ -1,6 +1,7 @@
 package authz
 
 import (
+	"fmt"
 	"time"
 
 	casbin "github.com/casbin/casbin/v2"
@@ -51,8 +52,8 @@ func defaultAuthzConfig() *authzConfig {
 	return &authzConfig{
 		// 默认使用内置的 ACL 模型
 		aclModel: defaultAclModel,
-		// 默认的自动加载策略时间间隔
-		autoLoadPolicyTime: 5 * time.Second,
+		// 默认的自动加载策略时间间隔（10秒）
+		autoLoadPolicyTime: 10 * time.Second,
 	}
 }
 
@@ -91,23 +92,26 @@ func NewAuthz(db *gorm.DB, opts ...Option) (*Authz, error) {
 	}
 
 	// 初始化 Gorm 适配器并用于 Casbin 授权器
-	adapter, err := adapter.NewAdapterByDB(db)
+	adp, err := adapter.NewAdapterByDB(db)
 	if err != nil {
-		return nil, err // 返回错误
+		return nil, fmt.Errorf("failed to create adapter: %w", err)
 	}
 
 	// 从配置中加载 Casbin 模型
-	m, _ := model.NewModelFromString(cfg.aclModel)
+	m, err := model.NewModelFromString(cfg.aclModel)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load model: %w", err)
+	}
 
 	// 初始化授权器
-	enforcer, err := casbin.NewSyncedEnforcer(m, adapter)
+	enforcer, err := casbin.NewSyncedEnforcer(m, adp)
 	if err != nil {
-		return nil, err // 返回错误
+		return nil, fmt.Errorf("failed to create enforcer: %w", err)
 	}
 
 	// 从数据库加载策略
 	if err := enforcer.LoadPolicy(); err != nil {
-		return nil, err // 返回错误
+		return nil, fmt.Errorf("failed to load policy: %w", err)
 	}
 
 	// 启动自动加载策略，使用配置的时间间隔

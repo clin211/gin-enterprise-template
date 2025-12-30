@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/jinzhu/copier"
@@ -9,14 +10,17 @@ import (
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/model"
 	"github.com/clin211/gin-enterprise-template/internal/pkg/errno"
 	"github.com/clin211/gin-enterprise-template/internal/pkg/known"
-	"github.com/clin211/gin-enterprise-template/pkg/store/where"
 	v1 "github.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1"
+	"github.com/clin211/gin-enterprise-template/pkg/store/where"
 )
 
 // Create 实现 UserBiz 接口中的 Create 方法.
 func (b *userBiz) Create(ctx context.Context, rq *v1.CreateUserRequest) (*v1.CreateUserResponse, error) {
 	var userM model.UserM
-	_ = copier.Copy(&userM, rq)
+	if err := copier.Copy(&userM, rq); err != nil {
+		slog.ErrorContext(ctx, "Failed to copy request to model", "error", err)
+		return nil, fmt.Errorf("failed to copy request: %w", err)
+	}
 
 	// 检查用户名是否已存在
 	if existingUser, err := b.store.User().Get(ctx, where.F("username", userM.Username).L(1)); err == nil && existingUser != nil {

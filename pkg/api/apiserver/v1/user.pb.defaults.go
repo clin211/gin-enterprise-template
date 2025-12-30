@@ -68,9 +68,3 @@ func (x *ListUserRequest) Default() {
 
 func (x *ListUserResponse) Default() {
 }
-
-func (x *GetCaptchaRequest) Default() {
-}
-
-func (x *GetCaptchaResponse) Default() {
-}

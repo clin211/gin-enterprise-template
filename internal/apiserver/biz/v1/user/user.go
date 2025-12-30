@@ -4,9 +4,8 @@ import (
 	"context"
 
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/store"
-	"github.com/clin211/gin-enterprise-template/pkg/authz"
-	"github.com/redis/go-redis/v9"
 	v1 "github.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1"
+	"github.com/clin211/gin-enterprise-template/pkg/authz"
 )
 
 // UserBiz 定义处理用户请求所需的方法.
@@ -25,20 +24,17 @@ type UserExpansion interface {
 	Login(ctx context.Context, rq *v1.LoginRequest) (*v1.LoginResponse, error)
 	RefreshToken(ctx context.Context, rq *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error)
 	ChangePassword(ctx context.Context, rq *v1.ChangePasswordRequest) (*v1.ChangePasswordResponse, error)
-	ListWithBadPerformance(ctx context.Context, rq *v1.ListUserRequest) (*v1.ListUserResponse, error)
-	GetCaptcha(ctx context.Context, rq *v1.GetCaptchaRequest) (*v1.GetCaptchaResponse, error)
 }
 
 // userBiz 是 UserBiz 接口的实现.
 type userBiz struct {
 	store store.IStore
 	authz *authz.Authz
-	redis *redis.Client
 }
 
 // 确保 userBiz 实现了 UserBiz 接口.
 var _ UserBiz = (*userBiz)(nil)
 
-func New(store store.IStore, authz *authz.Authz, redis *redis.Client) *userBiz {
-	return &userBiz{store: store, authz: authz, redis: redis}
+func New(store store.IStore, authz *authz.Authz) *userBiz {
+	return &userBiz{store: store, authz: authz}
 }

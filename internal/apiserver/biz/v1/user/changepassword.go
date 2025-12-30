@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/clin211/gin-enterprise-template/pkg/authn"
@@ -23,7 +24,12 @@ func (b *userBiz) ChangePassword(ctx context.Context, rq *v1.ChangePasswordReque
 		return nil, errno.ErrPasswordInvalid
 	}
 
-	userM.Password, _ = authn.Encrypt(rq.GetNewPassword())
+	encryptedPassword, err := authn.Encrypt(rq.GetNewPassword())
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to encrypt password", "error", err)
+		return nil, fmt.Errorf("failed to encrypt password: %w", err)
+	}
+	userM.Password = encryptedPassword
 	if err := b.store.User().Update(ctx, userM); err != nil {
 		return nil, err
 	}

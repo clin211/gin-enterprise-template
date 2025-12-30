@@ -3,9 +3,8 @@ package biz
 import (
 	userv1 "github.com/clin211/gin-enterprise-template/internal/apiserver/biz/v1/user"
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/store"
-	"github.com/google/wire"
 	"github.com/clin211/gin-enterprise-template/pkg/authz"
-	"github.com/redis/go-redis/v9"
+	"github.com/google/wire"
 )
 
 // ProviderSet is a Wire provider set used to declare dependency injection rules.
@@ -24,18 +23,17 @@ type IBiz interface {
 type biz struct {
 	store store.IStore
 	authz *authz.Authz
-	redis *redis.Client
 }
 
 // Ensure that biz implements the IBiz.
 var _ IBiz = (*biz)(nil)
 
 // NewBiz creates an instance of IBiz.
-func NewBiz(store store.IStore, authz *authz.Authz, redis *redis.Client) *biz {
-	return &biz{store: store, authz: authz, redis: redis}
+func NewBiz(store store.IStore, authz *authz.Authz) *biz {
+	return &biz{store: store, authz: authz}
 }
 
 // UserV1 返回一个实现了 UserBiz 接口的实例.
 func (b *biz) UserV1() userv1.UserBiz {
-	return userv1.New(b.store, b.authz, b.redis)
+	return userv1.New(b.store, b.authz)
 }

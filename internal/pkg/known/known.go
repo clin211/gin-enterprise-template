@@ -32,9 +32,3 @@ const (
 	// This value can be adjusted based on the specific scenario and needs.
 	MaxErrGroupConcurrency = 1000
 )
-
-// Define Redis key prefixes.
-const (
-	// CaptchaKeyPrefix defines the prefix for captcha keys in Redis.
-	CaptchaKeyPrefix = "captcha:"
-)

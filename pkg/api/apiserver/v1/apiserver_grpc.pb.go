@@ -8,6 +8,7 @@ package v1
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,7 +22,6 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	BlogService_Healthz_FullMethodName      = "/apiserver.v1.BlogService/Healthz"
-	BlogService_GetCaptcha_FullMethodName   = "/apiserver.v1.BlogService/GetCaptcha"
 	BlogService_Login_FullMethodName        = "/apiserver.v1.BlogService/Login"
 	BlogService_RefreshToken_FullMethodName = "/apiserver.v1.BlogService/RefreshToken"
 	BlogService_CreateUser_FullMethodName   = "/apiserver.v1.BlogService/CreateUser"
@@ -37,8 +37,6 @@ const (
 type BlogServiceClient interface {
 	// 健康检查
 	Healthz(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*HealthzResponse, error)
-	// 获取验证码
-	GetCaptcha(ctx context.Context, in *GetCaptchaRequest, opts ...grpc.CallOption) (*GetCaptchaResponse, error)
 	// 用户登录
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// 刷新令牌
@@ -67,16 +65,6 @@ func (c *blogServiceClient) Healthz(ctx context.Context, in *emptypb.Empty, opts
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HealthzResponse)
 	err := c.cc.Invoke(ctx, BlogService_Healthz_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *blogServiceClient) GetCaptcha(ctx context.Context, in *GetCaptchaRequest, opts ...grpc.CallOption) (*GetCaptchaResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetCaptchaResponse)
-	err := c.cc.Invoke(ctx, BlogService_GetCaptcha_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -159,8 +147,6 @@ func (c *blogServiceClient) ListUsers(ctx context.Context, in *ListUserRequest, 
 type BlogServiceServer interface {
 	// 健康检查
 	Healthz(context.Context, *emptypb.Empty) (*HealthzResponse, error)
-	// 获取验证码
-	GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaResponse, error)
 	// 用户登录
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// 刷新令牌
@@ -187,9 +173,6 @@ type UnimplementedBlogServiceServer struct{}
 
 func (UnimplementedBlogServiceServer) Healthz(context.Context, *emptypb.Empty) (*HealthzResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Healthz not implemented")
-}
-func (UnimplementedBlogServiceServer) GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetCaptcha not implemented")
 }
 func (UnimplementedBlogServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Login not implemented")
@@ -247,24 +230,6 @@ func _BlogService_Healthz_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlogServiceServer).Healthz(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BlogService_GetCaptcha_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCaptchaRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BlogServiceServer).GetCaptcha(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BlogService_GetCaptcha_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlogServiceServer).GetCaptcha(ctx, req.(*GetCaptchaRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -405,10 +370,6 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Healthz",
 			Handler:    _BlogService_Healthz_Handler,
-		},
-		{
-			MethodName: "GetCaptcha",
-			Handler:    _BlogService_GetCaptcha_Handler,
 		},
 		{
 			MethodName: "Login",

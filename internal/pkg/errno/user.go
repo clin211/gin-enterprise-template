@@ -66,10 +66,4 @@ var (
 		"User.EmailVerificationExpired",
 		"Email verification token has expired.",
 	)
-
-	ErrCaptchaInvalid = errorsx.NewBizError(
-		errorsx.CodeUserInvalidCredentials,
-		"User.CaptchaInvalid",
-		"Captcha verification failed.",
-	)
 )

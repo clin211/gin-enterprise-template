@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/gin-gonic/gin"
 	"github.com/clin211/gin-enterprise-template/pkg/core"
+	"github.com/gin-gonic/gin"
 
 	"github.com/clin211/gin-enterprise-template/internal/pkg/contextx"
 	"github.com/clin211/gin-enterprise-template/internal/pkg/errno"

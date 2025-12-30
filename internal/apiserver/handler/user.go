@@ -58,8 +58,3 @@ func (h *Handler) GetUser(c *gin.Context) {
 func (h *Handler) ListUser(c *gin.Context) {
 	core.HandleQueryRequest(c, h.biz.UserV1().List, h.val.ValidateListUserRequest)
 }
-
-// GetCaptcha 获取图形验证码.
-func (h *Handler) GetCaptcha(c *gin.Context) {
-	core.HandleQueryRequest(c, h.biz.UserV1().GetCaptcha)
-}

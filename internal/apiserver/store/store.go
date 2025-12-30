@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/google/wire"
 	"github.com/clin211/gin-enterprise-template/pkg/store/where"
+	"github.com/google/wire"
 	"gorm.io/gorm"
 )
 

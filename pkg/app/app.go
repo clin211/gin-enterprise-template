@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"runtime"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"k8s.io/component-base/cli"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/term"
-	"k8s.io/klog/v2"
 
 	"github.com/clin211/gin-enterprise-template/pkg/log"
 	genericoptions "github.com/clin211/gin-enterprise-template/pkg/options"
@@ -271,8 +271,13 @@ func (app *App) runCommand(cmd *cobra.Command, args []string) error {
 	app.initializeLogger()
 
 	if !app.silence {
-		klog.InfoS("Starting application", "name", app.name, "version", version.Get().ToJSON())
-		klog.InfoS("Golang settings", "GOGC", os.Getenv("GOGC"), "GOMAXPROCS", os.Getenv("GOMAXPROCS"), "GOTRACEBACK", os.Getenv("GOTRACEBACK"))
+		slog.Info("Starting application",
+			"name", app.name,
+			"version", version.Get().ToJSON())
+		slog.Info("Golang settings",
+			"GOGC", os.Getenv("GOGC"),
+			"GOMAXPROCS", os.Getenv("GOMAXPROCS"),
+			"GOTRACEBACK", os.Getenv("GOTRACEBACK"))
 		if !app.noConfig {
 			PrintConfig()
 		} else if app.options != nil {

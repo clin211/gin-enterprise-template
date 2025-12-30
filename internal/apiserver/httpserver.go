@@ -63,8 +63,7 @@ func (c *ServerConfig) InstallRESTAPI(engine *gin.Engine) {
 	hdl := handler.NewHandler(c.biz, c.val, authMiddlewares...)
 	// 注册健康检查接口
 	engine.GET("/healthz", hdl.Healthz)
-	// 注册用户登录、令牌刷新和验证码接口。这3个接口比较简单，所以没有 API 版本
-	engine.GET("/captcha", hdl.GetCaptcha)
+	// 注册用户登录、令牌刷新接口。这2个接口比较简单，所以没有 API 版本
 	engine.POST("/login", hdl.Login)
 	// 注意：认证中间件要在 hdl.RefreshToken 之前加载
 	engine.PUT("/refresh-token", mw.AuthnMiddleware(c.retriever), hdl.RefreshToken)

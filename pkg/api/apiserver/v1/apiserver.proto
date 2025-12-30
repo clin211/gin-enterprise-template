@@ -47,17 +47,6 @@ service BlogService {
             tags: "服务治理";
         };
     }
-    // 获取验证码
-    rpc GetCaptcha(GetCaptchaRequest) returns (GetCaptchaResponse) {
-        option (google.api.http) = {
-            get: "/captcha"
-        };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "获取图形验证码";
-            description: "生成并返回图形验证码";
-            tags: "验证码";
-        };
-    }
     // 用户登录
     rpc Login(LoginRequest) returns (LoginResponse) {
         option (google.api.http) = {

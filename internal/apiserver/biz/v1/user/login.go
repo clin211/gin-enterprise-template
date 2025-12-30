@@ -14,12 +14,6 @@ import (
 
 // Login 实现 UserBiz 接口中的 Login 方法.
 func (b *userBiz) Login(ctx context.Context, rq *v1.LoginRequest) (*v1.LoginResponse, error) {
-	// 验证验证码
-	if err := b.VerifyCaptcha(ctx, rq.GetCaptchaID(), rq.GetVerifyCode()); err != nil {
-		slog.ErrorContext(ctx, "Captcha verification failed", "error", err)
-		return nil, errno.ErrCaptchaInvalid
-	}
-
 	// 获取登录用户的所有信息
 	whr := where.F("username", rq.GetUsername())
 	userM, err := b.store.User().Get(ctx, whr)
@@ -34,11 +28,16 @@ func (b *userBiz) Login(ctx context.Context, rq *v1.LoginRequest) (*v1.LoginResp
 	}
 
 	// 如果匹配成功，说明登录成功，签发 access token 和 refresh token 并返回
-	accessToken, _, accessExpireAt, _, err := token.Sign(userM.UserID)
+	accessToken, refreshToken, accessExpireAt, refreshExpireAt, err := token.Sign(userM.UserID)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to sign token", "error", err)
 		return nil, errno.ErrSignToken
 	}
 
-	return &v1.LoginResponse{Token: accessToken, ExpireAt: accessExpireAt.Unix()}, nil
+	return &v1.LoginResponse{
+		Token:           accessToken,
+		RefreshToken:    refreshToken,
+		ExpireAt:        accessExpireAt.Unix(),
+		RefreshExpireAt: refreshExpireAt.Unix(),
+	}, nil
 }
