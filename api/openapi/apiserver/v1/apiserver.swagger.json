@@ -140,16 +140,15 @@
         },
         "parameters": [
           {
-            "name": "offset",
-            "description": "offset 表示偏移量\n@gotags: form:\"offset\"",
+            "name": "pageToken",
+            "description": "page_token 表示分页游标，用于获取下一页数据\n首次请求时为空，后续请求使用上一页返回的 page_token\n@gotags: form:\"page_token\"",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           {
-            "name": "limit",
-            "description": "limit 表示每页数量\n@gotags: form:\"limit\"",
+            "name": "pageSize",
+            "description": "page_size 表示每页数量\n@gotags: form:\"page_size\"",
             "in": "query",
             "required": false,
             "type": "string",
@@ -435,6 +434,10 @@
             "$ref": "#/definitions/v1User"
           },
           "title": "users 表示用户列表"
+        },
+        "pageToken": {
+          "type": "string",
+          "title": "page_token 表示分页游标，用于获取下一页数据；为空表示没有更多数据"
         }
       },
       "title": "ListUserResponse 表示用户列表响应"
@@ -456,23 +459,17 @@
     "v1LoginResponse": {
       "type": "object",
       "properties": {
-        "token": {
+        "accessToken": {
           "type": "string",
           "title": "token 表示返回的访问令牌"
-        },
-        "expireAt": {
-          "type": "string",
-          "format": "int64",
-          "title": "expireAt 表示该访问令牌的过期时间"
         },
         "refreshToken": {
           "type": "string",
           "title": "refreshToken 表示返回的刷新令牌"
         },
-        "refreshExpireAt": {
+        "expireAt": {
           "type": "string",
-          "format": "int64",
-          "title": "refreshExpireAt 表示刷新令牌的过期时间"
+          "title": "expireAt 表示该访问令牌的过期时间"
         }
       },
       "title": "LoginResponse 表示登录响应"

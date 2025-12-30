@@ -99,6 +99,22 @@ func HandleJSONRequest[T any, R any](c *gin.Context, handler Handler[T, R], vali
 	HandleRequest(c, c.ShouldBindJSON, handler, validators...)
 }
 
+// HandleNoBodyRequest 是处理无请求体的快捷函数.
+// 用于不需要请求 body 的接口（如刷新令牌等），直接创建空的请求结构体并调用处理函数.
+func HandleNoBodyRequest[T any, R any](c *gin.Context, handler Handler[T, R], validators ...Validator[T]) {
+	var request T
+
+	// 跳过绑定，直接执行验证和业务逻辑
+	if err := FinalizeRequest(c, &request, validators...); err != nil {
+		WriteResponse(c, nil, err)
+		return
+	}
+
+	// 调用实际的业务逻辑处理函数
+	response, err := handler(c.Request.Context(), &request)
+	WriteResponse(c, response, err)
+}
+
 // HandleQueryRequest 是处理 Query 参数请求的快捷函数.
 func HandleQueryRequest[T any, R any](c *gin.Context, handler Handler[T, R], validators ...Validator[T]) {
 	HandleRequest(c, c.ShouldBindQuery, handler, validators...)

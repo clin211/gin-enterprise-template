@@ -7,13 +7,12 @@
 package v1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "github.com/onexstack/protoc-gen-defaults/defaults"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -191,15 +190,13 @@ func (x *LoginRequest) GetPassword() string {
 type LoginResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// token 表示返回的访问令牌
-	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// expireAt 表示该访问令牌的过期时间
-	ExpireAt int64 `protobuf:"varint,2,opt,name=expireAt,proto3" json:"expireAt,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=accessToken,proto3" json:"accessToken,omitempty"`
 	// refreshToken 表示返回的刷新令牌
 	RefreshToken string `protobuf:"bytes,3,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
-	// refreshExpireAt 表示刷新令牌的过期时间
-	RefreshExpireAt int64 `protobuf:"varint,4,opt,name=refreshExpireAt,proto3" json:"refreshExpireAt,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// expireAt 表示该访问令牌的过期时间
+	ExpireAt      string `protobuf:"bytes,2,opt,name=expireAt,proto3" json:"expireAt,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *LoginResponse) Reset() {
@@ -232,18 +229,11 @@ func (*LoginResponse) Descriptor() ([]byte, []int) {
 	return file_apiserver_v1_user_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *LoginResponse) GetToken() string {
+func (x *LoginResponse) GetAccessToken() string {
 	if x != nil {
-		return x.Token
+		return x.AccessToken
 	}
 	return ""
-}
-
-func (x *LoginResponse) GetExpireAt() int64 {
-	if x != nil {
-		return x.ExpireAt
-	}
-	return 0
 }
 
 func (x *LoginResponse) GetRefreshToken() string {
@@ -253,11 +243,11 @@ func (x *LoginResponse) GetRefreshToken() string {
 	return ""
 }
 
-func (x *LoginResponse) GetRefreshExpireAt() int64 {
+func (x *LoginResponse) GetExpireAt() string {
 	if x != nil {
-		return x.RefreshExpireAt
+		return x.ExpireAt
 	}
-	return 0
+	return ""
 }
 
 // RefreshTokenRequest 表示刷新令牌的请求
@@ -898,12 +888,13 @@ func (x *GetUserResponse) GetUser() *User {
 // ListUserRequest 表示用户列表请求
 type ListUserRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// offset 表示偏移量
-	// @gotags: form:"offset"
-	Offset int64 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty" form:"offset"`
-	// limit 表示每页数量
-	// @gotags: form:"limit"
-	Limit         int64 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty" form:"limit"`
+	// page_token 表示分页游标，用于获取下一页数据
+	// 首次请求时为空，后续请求使用上一页返回的 page_token
+	// @gotags: form:"page_token"
+	PageToken string `protobuf:"bytes,1,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty" form:"page_token"`
+	// page_size 表示每页数量
+	// @gotags: form:"page_size"
+	PageSize      int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty" form:"page_size"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -938,16 +929,16 @@ func (*ListUserRequest) Descriptor() ([]byte, []int) {
 	return file_apiserver_v1_user_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *ListUserRequest) GetOffset() int64 {
+func (x *ListUserRequest) GetPageToken() string {
 	if x != nil {
-		return x.Offset
+		return x.PageToken
 	}
-	return 0
+	return ""
 }
 
-func (x *ListUserRequest) GetLimit() int64 {
+func (x *ListUserRequest) GetPageSize() int64 {
 	if x != nil {
-		return x.Limit
+		return x.PageSize
 	}
 	return 0
 }
@@ -958,7 +949,9 @@ type ListUserResponse struct {
 	// totalCount 表示总用户数
 	TotalCount int64 `protobuf:"varint,1,opt,name=totalCount,proto3" json:"totalCount,omitempty"`
 	// users 表示用户列表
-	Users         []*User `protobuf:"bytes,2,rep,name=users,proto3" json:"users,omitempty"`
+	Users []*User `protobuf:"bytes,2,rep,name=users,proto3" json:"users,omitempty"`
+	// page_token 表示分页游标，用于获取下一页数据；为空表示没有更多数据
+	PageToken     string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1007,6 +1000,13 @@ func (x *ListUserResponse) GetUsers() []*User {
 	return nil
 }
 
+func (x *ListUserResponse) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
 var File_apiserver_v1_user_proto protoreflect.FileDescriptor
 
 const file_apiserver_v1_user_proto_rawDesc = "" +
@@ -1023,12 +1023,11 @@ const file_apiserver_v1_user_proto_rawDesc = "" +
 	"\tupdatedAt\x18\b \x01(\x03R\tupdatedAt\"F\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x8f\x01\n" +
-	"\rLoginResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
-	"\bexpireAt\x18\x02 \x01(\x03R\bexpireAt\x12\"\n" +
-	"\frefreshToken\x18\x03 \x01(\tR\frefreshToken\x12(\n" +
-	"\x0frefreshExpireAt\x18\x04 \x01(\x03R\x0frefreshExpireAt\"\x15\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"q\n" +
+	"\rLoginResponse\x12 \n" +
+	"\vaccessToken\x18\x01 \x01(\tR\vaccessToken\x12\"\n" +
+	"\frefreshToken\x18\x03 \x01(\tR\frefreshToken\x12\x1a\n" +
+	"\bexpireAt\x18\x02 \x01(\tR\bexpireAt\"\x15\n" +
 	"\x13RefreshTokenRequest\"\x96\x01\n" +
 	"\x14RefreshTokenResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
@@ -1066,15 +1065,18 @@ const file_apiserver_v1_user_proto_rawDesc = "" +
 	"\x0eGetUserRequest\x12\x16\n" +
 	"\x06userID\x18\x01 \x01(\tR\x06userID\"9\n" +
 	"\x0fGetUserResponse\x12&\n" +
-	"\x04user\x18\x01 \x01(\v2\x12.apiserver.v1.UserR\x04user\"?\n" +
-	"\x0fListUserRequest\x12\x16\n" +
-	"\x06offset\x18\x01 \x01(\x03R\x06offset\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x03R\x05limit\"\\\n" +
+	"\x04user\x18\x01 \x01(\v2\x12.apiserver.v1.UserR\x04user\"M\n" +
+	"\x0fListUserRequest\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x01 \x01(\tR\tpageToken\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x03R\bpageSize\"{\n" +
 	"\x10ListUserResponse\x12\x1e\n" +
 	"\n" +
 	"totalCount\x18\x01 \x01(\x03R\n" +
 	"totalCount\x12(\n" +
-	"\x05users\x18\x02 \x03(\v2\x12.apiserver.v1.UserR\x05usersBDZBgithub.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1;v1b\x06proto3"
+	"\x05users\x18\x02 \x03(\v2\x12.apiserver.v1.UserR\x05users\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageTokenBDZBgithub.com/clin211/gin-enterprise-template/pkg/api/apiserver/v1;v1b\x06proto3"
 
 var (
 	file_apiserver_v1_user_proto_rawDescOnce sync.Once

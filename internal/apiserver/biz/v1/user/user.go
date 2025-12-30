@@ -22,7 +22,8 @@ type UserBiz interface {
 // UserExpansion 定义用户操作的扩展方法.
 type UserExpansion interface {
 	Login(ctx context.Context, rq *v1.LoginRequest) (*v1.LoginResponse, error)
-	RefreshToken(ctx context.Context, rq *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error)
+	// RefreshToken 返回与 Login 相同的数据结构
+	RefreshToken(ctx context.Context, rq *v1.RefreshTokenRequest) (*v1.LoginResponse, error)
 	ChangePassword(ctx context.Context, rq *v1.ChangePasswordRequest) (*v1.ChangePasswordResponse, error)
 }
 

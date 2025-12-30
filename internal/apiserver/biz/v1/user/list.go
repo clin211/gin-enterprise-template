@@ -8,6 +8,7 @@ import (
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/pkg/conversion"
 	"github.com/clin211/gin-enterprise-template/internal/pkg/contextx"
 	"github.com/clin211/gin-enterprise-template/internal/pkg/known"
+	"github.com/clin211/gin-enterprise-template/internal/pkg/pagination"
 	"github.com/clin211/gin-enterprise-template/pkg/store/where"
 	"golang.org/x/sync/errgroup"
 
@@ -16,7 +17,34 @@ import (
 
 // List 实现 UserBiz 接口中的 List 方法.
 func (b *userBiz) List(ctx context.Context, rq *v1.ListUserRequest) (*v1.ListUserResponse, error) {
-	whr := where.P(int(rq.GetOffset()), int(rq.GetLimit()))
+	// 解析 page_token 获取游标
+	pageToken := rq.GetPageToken()
+	var cursor *int64
+	if pageToken != "" {
+		decodedCursor, err := pagination.DecodeCursor(pageToken)
+		if err != nil {
+			slog.WarnContext(ctx, "Failed to decode page_token, starting from beginning", "error", err)
+		} else {
+			if id, ok := decodedCursor.GetInt64("id"); ok {
+				cursor = &id
+			}
+		}
+	}
+
+	// 构建 where.Options，使用游标分页
+	pageSize := int(rq.GetPageSize())
+	if pageSize <= 0 {
+		pageSize = 20 // 默认每页 20 条
+	}
+	// 限制最大 page_size 防止请求过多数据
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	whr := where.NewWhere(where.WithLimit(int64(pageSize)))
+	if cursor != nil {
+		whr.Cursor = cursor
+	}
 	if contextx.Username(ctx) != known.AdminUsername {
 		whr.T(ctx)
 	}
@@ -67,7 +95,21 @@ func (b *userBiz) List(ctx context.Context, rq *v1.ListUserRequest) (*v1.ListUse
 		users = append(users, user.(*v1.User))
 	}
 
+	// 生成下一页的 page_token
+	var nextPageToken string
+	if len(userList) > 0 {
+		lastUser := userList[len(userList)-1]
+		cursor, err := pagination.NewCursor("id", lastUser.ID)
+		if err == nil {
+			nextPageToken, _ = cursor.Encode()
+		}
+	}
+
 	slog.InfoContext(ctx, "Get users from backend storage", "count", len(users))
 
-	return &v1.ListUserResponse{TotalCount: count, Users: users}, nil
+	return &v1.ListUserResponse{
+		TotalCount: count,
+		Users:      users,
+		PageToken:  nextPageToken,
+	}, nil
 }

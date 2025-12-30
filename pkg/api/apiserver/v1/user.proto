@@ -37,13 +37,11 @@ message LoginRequest {
 // LoginResponse 表示登录响应
 message LoginResponse {
     // token 表示返回的访问令牌
-    string token = 1;
-    // expireAt 表示该访问令牌的过期时间
-    int64 expireAt = 2;
+    string accessToken = 1;
     // refreshToken 表示返回的刷新令牌
     string refreshToken = 3;
-    // refreshExpireAt 表示刷新令牌的过期时间
-    int64 refreshExpireAt = 4;
+    // expireAt 表示该访问令牌的过期时间
+    string expireAt = 2;
 }
 
 // RefreshTokenRequest 表示刷新令牌的请求
@@ -141,12 +139,13 @@ message GetUserResponse {
 
 // ListUserRequest 表示用户列表请求
 message ListUserRequest {
-    // offset 表示偏移量
-    // @gotags: form:"offset"
-    int64 offset = 1;
-    // limit 表示每页数量
-    // @gotags: form:"limit"
-    int64 limit = 2;
+    // page_token 表示分页游标，用于获取下一页数据
+    // 首次请求时为空，后续请求使用上一页返回的 page_token
+    // @gotags: form:"page_token"
+    string page_token = 1;
+    // page_size 表示每页数量
+    // @gotags: form:"page_size"
+    int64 page_size = 2;
 }
 
 // ListUserResponse 表示用户列表响应
@@ -155,5 +154,7 @@ message ListUserResponse {
     int64 totalCount = 1;
     // users 表示用户列表
     repeated User users = 2;
+    // page_token 表示分页游标，用于获取下一页数据；为空表示没有更多数据
+    string page_token = 3;
 }
 

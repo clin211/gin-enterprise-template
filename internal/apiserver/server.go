@@ -49,7 +49,7 @@ type ServerConfig struct {
 
 // NewServer initializes and returns a new Server instance.
 func (cfg *Config) NewServer(ctx context.Context) (*Server, error) {
-	where.RegisterTenant("userID", func(ctx context.Context) string {
+	where.RegisterTenant("user_id", func(ctx context.Context) string {
 		return contextx.UserID(ctx)
 	})
 
@@ -108,7 +108,7 @@ type UserRetriever struct {
 
 // GetUser 根据用户 ID 获取用户信息.
 func (r *UserRetriever) GetUser(ctx context.Context, userID string) (*model.UserM, error) {
-	return r.store.User().Get(ctx, where.F("userID", userID))
+	return r.store.User().Get(ctx, where.F("user_id", userID))
 }
 
 // ProvideDB provides a database instance based on the configuration.

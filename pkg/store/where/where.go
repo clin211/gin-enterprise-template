@@ -52,6 +52,10 @@ type Options struct {
 	Clauses []clause.Expression
 	// Queries contains a list of queries to be executed.
 	Queries []Query
+	// Cursor holds the cursor value for cursor-based pagination.
+	// It stores the ID of the last record from the previous page.
+	// +optional
+	Cursor *int64 `json:"cursor"`
 }
 
 // tenant holds the registered tenant instance.
@@ -113,6 +117,27 @@ func WithClauses(conds ...clause.Expression) Option {
 func WithQuery(query interface{}, args ...interface{}) Option {
 	return func(whr *Options) {
 		whr.Queries = append(whr.Queries, Query{Query: query, Args: args})
+	}
+}
+
+// WithCursor initializes the Cursor field in Options with the given cursor value.
+func WithCursor(cursor int64) Option {
+	return func(whr *Options) {
+		whr.Cursor = &cursor
+	}
+}
+
+// WithPageToken initializes the Cursor field in Options using a page token string.
+// The token is base64 encoded and contains the cursor value (last record ID).
+func WithPageToken(pageToken string, decoder func(token string) (*int64, error)) Option {
+	return func(whr *Options) {
+		if pageToken == "" {
+			return
+		}
+		cursor, err := decoder(pageToken)
+		if err == nil && cursor != nil {
+			whr.Cursor = cursor
+		}
 	}
 }
 
@@ -206,7 +231,12 @@ func (whr *Options) Where(db *gorm.DB) *gorm.DB {
 		conds := db.Statement.BuildCondition(query.Query, query.Args...)
 		whr.Clauses = append(whr.Clauses, conds...)
 	}
-	return db.Where(whr.Filters).Clauses(whr.Clauses...).Offset(whr.Offset).Limit(whr.Limit)
+	db = db.Where(whr.Filters).Clauses(whr.Clauses...)
+	// Apply cursor condition for cursor-based pagination
+	if whr.Cursor != nil {
+		db = db.Where("id > ?", *whr.Cursor)
+	}
+	return db.Offset(whr.Offset).Limit(whr.Limit)
 }
 
 // O is a convenience function to create a new Options with offset.

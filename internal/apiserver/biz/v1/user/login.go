@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/clin211/gin-enterprise-template/pkg/authn"
 	"github.com/clin211/gin-enterprise-template/pkg/store/where"
@@ -28,16 +29,15 @@ func (b *userBiz) Login(ctx context.Context, rq *v1.LoginRequest) (*v1.LoginResp
 	}
 
 	// 如果匹配成功，说明登录成功，签发 access token 和 refresh token 并返回
-	accessToken, refreshToken, accessExpireAt, refreshExpireAt, err := token.Sign(userM.UserID)
+	accessToken, refreshToken, accessExpireAt, _, err := token.Sign(userM.UserID)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to sign token", "error", err)
 		return nil, errno.ErrSignToken
 	}
 
 	return &v1.LoginResponse{
-		Token:           accessToken,
-		RefreshToken:    refreshToken,
-		ExpireAt:        accessExpireAt.Unix(),
-		RefreshExpireAt: refreshExpireAt.Unix(),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpireAt:     accessExpireAt.Format(time.RFC3339),
 	}, nil
 }

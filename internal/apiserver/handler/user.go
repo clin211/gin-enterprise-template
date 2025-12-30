@@ -25,8 +25,9 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 // RefreshToken 刷新 JWT Token.
+// refresh token 从 Authorization header 获取，request body 可以为空.
 func (h *Handler) RefreshToken(c *gin.Context) {
-	core.HandleJSONRequest(c, h.biz.UserV1().RefreshToken)
+	core.HandleNoBodyRequest(c, h.biz.UserV1().RefreshToken)
 }
 
 // ChangePassword 修改用户密码.
