@@ -1,19 +1,21 @@
 http:
   addr: 0.0.0.0:5557 # 服务监听地址
 timeout: 30s # 服务端超时
-jwt-key: 9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8 # jwt 签名密钥
-expiration: 7 # token 过期时间，单位：天
+jwt:
+  secret: 9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8 # jwt 签名密钥
+  access-expiration: 2h # Access Token 有效期。单位：h(小时)
+  refresh-expiration: 168h # Refresh Token 有效期，单位：h(小时)
 postgresql:
-  addr: 127.0.0.1:54321
+  addr: 127.0.0.1:5432
   database: cs-pedia
-  username: postgres
-  password: postgres
+  username: app_user
+  password: 2eVHeXDmZ5nTDiPb
   max-idle-connections: 100 # 最大空闲连接数
   max-open-connections: 1000 # 最大打开连接数
   max-connection-life-time: 5m # 连接最大生命周期
   log-level: 4 # 日志级别
 redis: # Redis 数据库相关配置
-  addr: 127.0.0.1:63790 # Redis 服务器地址和端口，默认 127.0.0.1:6379
+  addr: 127.0.0.1:6379 # Redis 服务器地址和端口，默认 127.0.0.1:6379
   username: "" # Redis 用户名（使用默认用户，留空）
   password: Q6jAu8trwDEcJN7V # Redis 用户密码
   database: 0 # Redis 数据库索引，默认 0

@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/spf13/pflag"
 )
 
 var _ IOptions = (*JWTOptions)(nil)
 
-// JWTOptions contains configuration items related to API server features.
+// JWTOptions contains configuration items related to JWT authentication.
 type JWTOptions struct {
-	Key           string        `json:"key" mapstructure:"key"`
-	Expired       time.Duration `json:"expired" mapstructure:"expired"`
-	MaxRefresh    time.Duration `json:"max-refresh" mapstructure:"max-refresh"`
-	SigningMethod string        `json:"signing-method" mapstructure:"signing-method"`
+	// Secret is the private key used to sign JWT tokens.
+	Secret string `json:"secret" mapstructure:"secret"`
+	// AccessExpiration is the expiration time for access tokens.
+	AccessExpiration time.Duration `json:"access-expiration" mapstructure:"access-expiration"`
+	// RefreshExpiration is the expiration time for refresh tokens.
+	RefreshExpiration time.Duration `json:"refresh-expiration" mapstructure:"refresh-expiration"`
 
 	fullPrefix string
 }
@@ -23,37 +24,43 @@ type JWTOptions struct {
 // NewJWTOptions creates a JWTOptions object with default parameters.
 func NewJWTOptions() *JWTOptions {
 	return &JWTOptions{
-		// Realm:         "",
-		Key:           "onex(#)666",
-		Expired:       2 * time.Hour,
-		MaxRefresh:    2 * time.Hour,
-		SigningMethod: "HS512",
+		Secret:           "9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8",
+		AccessExpiration: 2 * time.Hour,
+		RefreshExpiration: 168 * time.Hour, // 7 days
 	}
 }
 
-// Validate is used to parse and validate the parameters entered by the user at
-// the command line when the program starts.
-func (s *JWTOptions) Validate() []error {
+// Validate is used to parse and validate the JWT parameters.
+func (o *JWTOptions) Validate() []error {
 	var errs []error
 
-	if !govalidator.StringLength(s.Key, "6", "32") {
-		errs = append(errs, fmt.Errorf("--%s.key must larger than 5 and little than 33", s.fullPrefix))
+	if o.Secret == "" {
+		errs = append(errs, fmt.Errorf("--%s.secret must be specified", o.fullPrefix))
+	}
+	if len(o.Secret) < 6 {
+		errs = append(errs, fmt.Errorf("--%s.secret must be at least 6 characters long", o.fullPrefix))
+	}
+	if o.AccessExpiration <= 0 {
+		errs = append(errs, fmt.Errorf("--%s.access-expiration must be positive", o.fullPrefix))
+	}
+	if o.RefreshExpiration <= 0 {
+		errs = append(errs, fmt.Errorf("--%s.refresh-expiration must be positive", o.fullPrefix))
+	}
+	if o.RefreshExpiration < o.AccessExpiration {
+		errs = append(errs, fmt.Errorf("--%s.refresh-expiration must be greater than or equal to access-expiration", o.fullPrefix))
 	}
 
 	return errs
 }
 
-// AddFlags adds flags related to features for a specific api server to the
-// specified FlagSet.
-func (s *JWTOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
+// AddFlags adds flags related to JWT configuration to the specified FlagSet.
+func (o *JWTOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	if fs == nil {
 		return
 	}
 
-	// fs.StringVar(&s.Realm, fullPrefix+".realm", s.Realm, "Realm name to display to the user.")
-	fs.StringVar(&s.Key, fullPrefix+".key", s.Key, "Private key used to sign jwt token.")
-	fs.DurationVar(&s.Expired, fullPrefix+".expired", s.Expired, "JWT token expiration time.")
-	fs.DurationVar(&s.MaxRefresh, fullPrefix+".max-refresh", s.MaxRefresh, ""+
-		"This field allows clients to refresh their token until MaxRefresh has passed.")
-	fs.StringVar(&s.SigningMethod, fullPrefix+".signing-method", s.SigningMethod, "JWT token signature method.")
+	o.fullPrefix = fullPrefix
+	fs.StringVar(&o.Secret, fullPrefix+".secret", o.Secret, "Private key used to sign JWT tokens.")
+	fs.DurationVar(&o.AccessExpiration, fullPrefix+".access-expiration", o.AccessExpiration, "JWT access token expiration time.")
+	fs.DurationVar(&o.RefreshExpiration, fullPrefix+".refresh-expiration", o.RefreshExpiration, "JWT refresh token expiration time.")
 }

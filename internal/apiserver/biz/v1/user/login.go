@@ -33,12 +33,12 @@ func (b *userBiz) Login(ctx context.Context, rq *v1.LoginRequest) (*v1.LoginResp
 		return nil, errno.ErrPasswordInvalid
 	}
 
-	// 如果匹配成功，说明登录成功，签发 token 并返回
-	tokenStr, expireAt, err := token.Sign(userM.UserID)
+	// 如果匹配成功，说明登录成功，签发 access token 和 refresh token 并返回
+	accessToken, _, accessExpireAt, _, err := token.Sign(userM.UserID)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to sign token", "error", err)
 		return nil, errno.ErrSignToken
 	}
 
-	return &v1.LoginResponse{Token: tokenStr, ExpireAt: expireAt.Unix()}, nil
+	return &v1.LoginResponse{Token: accessToken, ExpireAt: accessExpireAt.Unix()}, nil
 }

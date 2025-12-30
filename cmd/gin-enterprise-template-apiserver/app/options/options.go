@@ -2,9 +2,6 @@
 package options
 
 import (
-	"errors"
-	"time"
-
 	genericoptions "github.com/clin211/gin-enterprise-template/pkg/options"
 	"github.com/spf13/pflag"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
@@ -14,10 +11,8 @@ import (
 
 // ServerOptions contains the configuration options for the server.
 type ServerOptions struct {
-	// JWTKey 定义 JWT 密钥.
-	JWTKey string `json:"jwt-key" mapstructure:"jwt-key"`
-	// Expiration 定义 JWT Token 的过期时间.
-	Expiration time.Duration `json:"expiration" mapstructure:"expiration"`
+	// JWTOptions contains the JWT authentication configuration options.
+	JWTOptions *genericoptions.JWTOptions `json:"jwt" mapstructure:"jwt"`
 	// TLSOptions contains the TLS configuration options.
 	TLSOptions *genericoptions.TLSOptions `json:"tls" mapstructure:"tls"`
 	// HTTPOptions contains the HTTP configuration options.
@@ -33,11 +28,9 @@ type ServerOptions struct {
 // NewServerOptions creates a ServerOptions instance with default values.
 func NewServerOptions() *ServerOptions {
 	opts := &ServerOptions{
-		JWTKey:      "",
-		Expiration:  2 * time.Hour,
-		TLSOptions:  genericoptions.NewTLSOptions(),
-		HTTPOptions: genericoptions.NewHTTPOptions(),
-
+		JWTOptions:        genericoptions.NewJWTOptions(),
+		TLSOptions:        genericoptions.NewTLSOptions(),
+		HTTPOptions:       genericoptions.NewHTTPOptions(),
 		PostgreSQLOptions: genericoptions.NewPostgreSQLOptions(),
 		RedisOptions:      genericoptions.NewRedisOptions(),
 		OTelOptions:       genericoptions.NewOTelOptions(),
@@ -49,10 +42,8 @@ func NewServerOptions() *ServerOptions {
 
 // AddFlags binds the options in ServerOptions to command-line flags.
 func (o *ServerOptions) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&o.JWTKey, "jwt-key", o.JWTKey, "JWT signing key. Must be at least 6 characters long.")
-	// 绑定 JWT Token 的过期时间选项到命令行标志。
-	// 参数名称为 `--expiration`，默认值为 o.Expiration
-	fs.DurationVar(&o.Expiration, "expiration", o.Expiration, "The expiration duration of JWT tokens.")
+	// Add JWT options flags
+	o.JWTOptions.AddFlags(fs, "jwt")
 	// Add command-line flags for sub-options.
 	o.TLSOptions.AddFlags(fs, "tls")
 	o.HTTPOptions.AddFlags(fs, "http")
@@ -70,11 +61,9 @@ func (o *ServerOptions) Complete() error {
 // Validate checks whether the options in ServerOptions are valid.
 func (o *ServerOptions) Validate() error {
 	errs := []error{}
-	// 校验 JWTKey 长度
-	if len(o.JWTKey) < 6 {
-		errs = append(errs, errors.New("JWTKey must be at least 6 characters long"))
-	}
 
+	// Validate JWT options
+	errs = append(errs, o.JWTOptions.Validate()...)
 	// Validate sub-options.
 	errs = append(errs, o.TLSOptions.Validate()...)
 	errs = append(errs, o.HTTPOptions.Validate()...)
@@ -89,8 +78,7 @@ func (o *ServerOptions) Validate() error {
 // Config builds an apiserver.Config based on ServerOptions.
 func (o *ServerOptions) Config() (*apiserver.Config, error) {
 	return &apiserver.Config{
-		JWTKey:            o.JWTKey,
-		Expiration:        o.Expiration,
+		JWTOptions:        o.JWTOptions,
 		TLSOptions:        o.TLSOptions,
 		HTTPOptions:       o.HTTPOptions,
 		PostgreSQLOptions: o.PostgreSQLOptions,

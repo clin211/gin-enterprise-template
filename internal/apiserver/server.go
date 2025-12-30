@@ -25,8 +25,7 @@ import (
 
 // Config contains application-related configurations.
 type Config struct {
-	JWTKey            string
-	Expiration        time.Duration
+	JWTOptions        *genericoptions.JWTOptions
 	TLSOptions        *genericoptions.TLSOptions
 	HTTPOptions       *genericoptions.HTTPOptions
 	PostgreSQLOptions *genericoptions.PostgreSQLOptions
@@ -54,11 +53,12 @@ func (cfg *Config) NewServer(ctx context.Context) (*Server, error) {
 		return contextx.UserID(ctx)
 	})
 
-	// 初始化 token 包的签名密钥、认证 Key 及 Token 默认过期时间
+	// 初始化 token 包的签名密钥、Access Token 和 Refresh Token 过期时间
 	token.Init(
-		cfg.JWTKey,
+		cfg.JWTOptions.Secret,
+		cfg.JWTOptions.AccessExpiration,
+		cfg.JWTOptions.RefreshExpiration,
 		token.WithIdentityKey(known.XUserID),
-		token.WithExpiration(cfg.Expiration),
 	)
 	// Create the core server instance.
 	return NewServer(cfg)

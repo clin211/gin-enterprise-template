@@ -21,8 +21,10 @@ type Config struct {
 	key string
 	// identityKey 是 token 中用户身份的键.
 	identityKey string
-	// expiration 是签发的 token 过期时间
-	expiration time.Duration
+	// accessExpiration 是 Access Token 的过期时间
+	accessExpiration time.Duration
+	// refreshExpiration 是 Refresh Token 的过期时间
+	refreshExpiration time.Duration
 	// skipPaths 需要跳过认证的路径列表
 	skipPaths []string
 }
@@ -30,12 +32,19 @@ type Config struct {
 // Option 用于配置 token 包的选项
 type Option func(*Config)
 
+// Token 类型常量
+const (
+	TokenTypeAccess  = "access"
+	TokenTypeRefresh = "refresh"
+)
+
 var (
 	config = Config{
-		key:         "",
-		identityKey: "",
-		expiration:  2 * time.Hour,
-		skipPaths:   []string{}, // 默认不跳过任何路径
+		key:               "",
+		identityKey:       "",
+		accessExpiration:  2 * time.Hour,
+		refreshExpiration: 7 * 24 * time.Hour,
+		skipPaths:         []string{}, // 默认不跳过任何路径
 	}
 	once sync.Once // 确保配置只被初始化一次
 )
@@ -49,7 +58,11 @@ var (
 	ErrEmptyAuthHeader     = errors.New("authorization header is empty")
 	ErrMalformedAuthHeader = errors.New("malformed authorization header")
 	ErrInvalidTokenClaims  = errors.New("invalid token claims")
-	ErrPathSkipped         = errors.New("path is skipped for authentication") // 新增：路径跳过认证
+	ErrPathSkipped         = errors.New("path is skipped for authentication")
+	ErrInvalidTokenType    = errors.New("invalid token type")
+	ErrNotRefreshToken     = errors.New("token is not a refresh token")
+	ErrNotAccessToken      = errors.New("token is not an access token")
+	ErrMissingTokenType    = errors.New("missing token type in claims")
 )
 
 // WithKey 设置签名密钥
@@ -65,15 +78,6 @@ func WithKey(key string) Option {
 func WithIdentityKey(identityKey string) Option {
 	return func(c *Config) {
 		c.identityKey = identityKey // 允许设置为空字符串来禁用身份键验证
-	}
-}
-
-// WithExpiration 设置过期时间
-func WithExpiration(expiration time.Duration) Option {
-	return func(c *Config) {
-		if expiration > 0 {
-			c.expiration = expiration
-		}
 	}
 }
 
@@ -117,10 +121,16 @@ func WithSkipPathsPattern(patterns ...string) Option {
 }
 
 // Init 设置包级别的配置 config, config 会用于本包后面的 token 签发和解析.
-func Init(key string, opts ...Option) {
+func Init(key string, accessExpiration, refreshExpiration time.Duration, opts ...Option) {
 	once.Do(func() {
 		if key != "" {
 			config.key = key // 设置密钥
+		}
+		if accessExpiration > 0 {
+			config.accessExpiration = accessExpiration
+		}
+		if refreshExpiration > 0 {
+			config.refreshExpiration = refreshExpiration
 		}
 
 		// 应用所有配置选项
@@ -134,10 +144,11 @@ func Init(key string, opts ...Option) {
 func Reset() {
 	once = sync.Once{}
 	config = Config{
-		key:         "Rtg8BPKNEf2mB4mgvKONGPZZQSaJWNLijxR42qRgq0iBb5",
-		identityKey: "identityKey",
-		expiration:  2 * time.Hour,
-		skipPaths:   []string{},
+		key:               "Rtg8BPKNEf2mB4mgvKONGPZZQSaJWNLijxR42qRgq0iBb5",
+		identityKey:       "identityKey",
+		accessExpiration:  2 * time.Hour,
+		refreshExpiration: 7 * 24 * time.Hour,
+		skipPaths:         []string{},
 	}
 }
 
@@ -275,19 +286,29 @@ func extractIdentity(claims jwt.MapClaims) (string, error) {
 	return identity, nil
 }
 
-// ParseRequest 从请求头中获取令牌，并将其传递递给 Parse 函数以解析令牌.
+// ParseRequest 从请求头中获取令牌，并将其传递递给 Parse 函数以解析令牌
+// 验证 token_type 必须为 "access"
 func ParseRequest(ctx context.Context) (string, error) {
 	// 检查是否应该跳过认证
 	if shouldSkipRequestPath(ctx) {
 		return "", nil // 返回特殊错误表示路径被跳过
 	}
 
-	token, err := extractTokenFromRequest(ctx)
+	tokenString, err := extractTokenFromRequest(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	return ParseIdentity(token, config.key)
+	// 验证 token 类型
+	tokenType, err := GetTokenType(tokenString)
+	if err != nil {
+		return "", err
+	}
+	if tokenType != TokenTypeAccess {
+		return "", ErrNotAccessToken
+	}
+
+	return ParseIdentity(tokenString, config.key)
 }
 
 // shouldSkipRequestPath 检查请求路径是否应该跳过认证
@@ -303,13 +324,23 @@ func shouldSkipRequestPath(ctx context.Context) bool {
 }
 
 // ParseRequestIgnoreSkip 强制解析请求，忽略跳过路径设置
+// 验证 token_type 必须为 "access"
 func ParseRequestIgnoreSkip(ctx context.Context) (string, error) {
-	token, err := extractTokenFromRequest(ctx)
+	tokenString, err := extractTokenFromRequest(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	return ParseIdentity(token, config.key)
+	// 验证 token 类型
+	tokenType, err := GetTokenType(tokenString)
+	if err != nil {
+		return "", err
+	}
+	if tokenType != TokenTypeAccess {
+		return "", ErrNotAccessToken
+	}
+
+	return ParseIdentity(tokenString, config.key)
 }
 
 // extractTokenFromRequest 从不同类型的请求上下文中提取 token
@@ -356,47 +387,61 @@ func parseAuthorizationHeader(header string) (string, error) {
 	return token, nil
 }
 
-// Sign 使用 jwtSecret 签发 token，token 的 claims 中会存放传入的 subject.
-func Sign(identityValue string) (string, time.Time, error) {
+// Sign 使用 jwtSecret 签发 Access Token 和 Refresh Token 对
+func Sign(identityValue string) (accessToken, refreshToken string, accessExpireAt, refreshExpireAt time.Time, err error) {
 	if config.key == "" {
-		return "", time.Time{}, jwt.ErrInvalidKey
+		return "", "", time.Time{}, time.Time{}, jwt.ErrInvalidKey
 	}
 
 	now := time.Now()
-	expireAt := now.Add(config.expiration)
+	accessExpireAt = now.Add(config.accessExpiration)
+	refreshExpireAt = now.Add(config.refreshExpiration)
 
-	// 构建基础 claims
-	claims := jwt.MapClaims{
-		"nbf": now.Unix(),      // token 生效时间
-		"iat": now.Unix(),      // token 签发时间
-		"exp": expireAt.Unix(), // token 过期时间
+	// 签发 Access Token
+	accessClaims := jwt.MapClaims{
+		"token_type": TokenTypeAccess,
+		"nbf":        now.Unix(),
+		"iat":        now.Unix(),
+		"exp":        accessExpireAt.Unix(),
 	}
-
-	// 只有在配置了身份键且传入了身份值时，才添加身份信息
 	if config.identityKey != "" && identityValue != "" {
-		claims[config.identityKey] = identityValue
+		accessClaims[config.identityKey] = identityValue
 	}
 
-	// 创建 token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// 签发 token
-	tokenString, err := token.SignedString([]byte(config.key))
+	accessTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessToken, err = accessTokenObj.SignedString([]byte(config.key))
 	if err != nil {
-		return "", time.Time{}, fmt.Errorf("failed to sign token: %w", err)
+		return "", "", time.Time{}, time.Time{}, fmt.Errorf("failed to sign access token: %w", err)
 	}
 
-	return tokenString, expireAt, nil
+	// 签发 Refresh Token
+	refreshClaims := jwt.MapClaims{
+		"token_type": TokenTypeRefresh,
+		"nbf":        now.Unix(),
+		"iat":        now.Unix(),
+		"exp":        refreshExpireAt.Unix(),
+	}
+	if config.identityKey != "" && identityValue != "" {
+		refreshClaims[config.identityKey] = identityValue
+	}
+
+	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshToken, err = refreshTokenObj.SignedString([]byte(config.key))
+	if err != nil {
+		return "", "", time.Time{}, time.Time{}, fmt.Errorf("failed to sign refresh token: %w", err)
+	}
+
+	return accessToken, refreshToken, accessExpireAt, refreshExpireAt, nil
 }
 
-// SignWithClaims 使用自定义 claims 签发 token
+// SignWithClaims 使用自定义 claims 签发 token（使用 accessExpiration）
 func SignWithClaims(customClaims jwt.MapClaims) (string, time.Time, error) {
 	if config.key == "" {
 		return "", time.Time{}, jwt.ErrInvalidKey
 	}
 
 	now := time.Now()
-	expireAt := now.Add(config.expiration)
+	expireAt := now.Add(config.accessExpiration)
 
 	// 合并自定义 claims 和必要的时间字段
 	claims := make(jwt.MapClaims)
@@ -496,9 +541,14 @@ func IsIdentityRequired() bool {
 	return config.identityKey != ""
 }
 
-// GetExpiration 获取当前配置的过期时间
-func GetExpiration() time.Duration {
-	return config.expiration
+// GetAccessExpiration 获取 Access Token 过期时间
+func GetAccessExpiration() time.Duration {
+	return config.accessExpiration
+}
+
+// GetRefreshExpiration 获取 Refresh Token 过期时间
+func GetRefreshExpiration() time.Duration {
+	return config.refreshExpiration
 }
 
 // GetSkipPaths 获取跳过认证的路径列表
@@ -541,4 +591,64 @@ func ParseWithKey(tokenString, key string) (jwt.MapClaims, error) {
 	}
 
 	return claims, nil
+}
+
+// ParseRefreshToken 解析并验证 Refresh Token（验证 token_type="refresh"）
+func ParseRefreshToken(tokenString string) (string, error) {
+	if tokenString == "" {
+		return "", ErrEmptyToken
+	}
+
+	// 验证 token 类型
+	tokenType, err := GetTokenType(tokenString)
+	if err != nil {
+		return "", err
+	}
+	if tokenType != TokenTypeRefresh {
+		return "", ErrNotRefreshToken
+	}
+
+	return ParseIdentity(tokenString, config.key)
+}
+
+// GetTokenType 获取 token 类型
+func GetTokenType(tokenString string) (string, error) {
+	if tokenString == "" {
+		return "", ErrEmptyToken
+	}
+
+	claims, err := GetClaims(tokenString)
+	if err != nil {
+		return "", err
+	}
+
+	tokenType, exists := claims["token_type"]
+	if !exists {
+		return "", ErrMissingTokenType
+	}
+
+	typeStr, ok := tokenType.(string)
+	if !ok {
+		return "", ErrInvalidTokenType
+	}
+
+	return typeStr, nil
+}
+
+// IsAccessToken 检查是否为 Access Token
+func IsAccessToken(tokenString string) bool {
+	tokenType, err := GetTokenType(tokenString)
+	if err != nil {
+		return false
+	}
+	return tokenType == TokenTypeAccess
+}
+
+// IsRefreshToken 检查是否为 Refresh Token
+func IsRefreshToken(tokenString string) bool {
+	tokenType, err := GetTokenType(tokenString)
+	if err != nil {
+		return false
+	}
+	return tokenType == TokenTypeRefresh
 }
