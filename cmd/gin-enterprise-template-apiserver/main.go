@@ -6,16 +6,15 @@ import (
 	"github.com/clin211/gin-enterprise-template/cmd/gin-enterprise-template-apiserver/app"
 )
 
-// The default entry point of a Go program. Serves as the starting point
-// for reading the project code.
+// Go 程序的默认入口点。作为阅读项目代码的起点。
 func main() {
 	command := app.NewWebServerCommand()
 
-	// Execute the command and handle errors.
+	// 执行命令并处理错误。
 	if err := command.Execute(); err != nil {
-		// Exit the program if an error occurs.
-		// Return an exit code so that other programs (e.g., bash scripts)
-		// can determine the service status based on the exit code.
+		// 如果发生错误则退出程序。
+		// 返回退出代码，以便其他程序（例如 bash 脚本）
+		// 可以根据退出代码确定服务状态。
 		os.Exit(1)
 	}
 }

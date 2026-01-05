@@ -9,43 +9,43 @@ import (
 
 var _ IOptions = (*SecureServingOptions)(nil)
 
-// SecureServingOptions contains configuration items related to HTTPS server startup.
+// SecureServingOptions 包含与 HTTPS 服务器启动相关的配置项。
 type SecureServingOptions struct {
 	BindAddress string `json:"bind-address"`
-	// BindPort is ignored when Listener is set, will serve HTTPS even with 0.
+	// BindPort 在设置 Listener 时被忽略，即使为 0 也会提供 HTTPS。
 	BindPort int `json:"bind-port"`
-	// Required set to true means that BindPort cannot be zero.
+	// Required 设置为 true 意味着 BindPort 不能为零。
 	Required bool
-	// ServerCert is the TLS cert info for serving secure traffic
+	// ServerCert 是用于提供安全流量的 TLS 证书信息
 	ServerCert GeneratableKeyCert `json:"tls"`
 	// AdvertiseAddress net.IP
 
 	fullPrefix string
 }
 
-// CertKey contains configuration items related to certificate.
+// CertKey 包含与证书相关的配置项。
 type CertKey struct {
-	// CertFile is a file containing a PEM-encoded certificate, and possibly the complete certificate chain
+	// CertFile 是包含 PEM 编码证书的文件，可能还包含完整的证书链
 	CertFile string `json:"cert-file"`
-	// KeyFile is a file containing a PEM-encoded private key for the certificate specified by CertFile
+	// KeyFile 是包含 CertFile 指定的证书的 PEM 编码私钥的文件
 	KeyFile string `json:"private-key-file"`
 }
 
-// GeneratableKeyCert contains configuration items related to certificate.
+// GeneratableKeyCert 包含与证书相关的配置项。
 type GeneratableKeyCert struct {
-	// CertKey allows setting an explicit cert/key file to use.
+	// CertKey 允许设置要使用的显式证书/密钥文件。
 	CertKey CertKey `json:"cert-key"`
 
-	// CertDirectory specifies a directory to write generated certificates to if CertFile/KeyFile aren't explicitly set.
-	// PairName is used to determine the filenames within CertDirectory.
-	// If CertDirectory and PairName are not set, an in-memory certificate will be generated.
+	// 如果未显式设置 CertFile/KeyFile，则指定写入生成证书的目录。
+	// PairName 用于确定 CertDirectory 中的文件名。
+	// 如果未设置 CertDirectory 和 PairName，将生成内存中的证书。
 	CertDirectory string `json:"cert-dir"`
-	// PairName is the name which will be used with CertDirectory to make a cert and key filenames.
-	// It becomes CertDirectory/PairName.crt and CertDirectory/PairName.key
+	// PairName 是将与 CertDirectory 一起使用的名称，用于制作证书和密钥文件名。
+	// 它变成 CertDirectory/PairName.crt 和 CertDirectory/PairName.key
 	PairName string `json:"pair-name"`
 }
 
-// NewSecureServingOptions creates a SecureServingOptions object with default parameters.
+// NewSecureServingOptions 创建带有默认参数的 SecureServingOptions 对象。
 func NewSecureServingOptions() *SecureServingOptions {
 	return &SecureServingOptions{
 		BindAddress: "0.0.0.0",
@@ -58,8 +58,7 @@ func NewSecureServingOptions() *SecureServingOptions {
 	}
 }
 
-// Validate is used to parse and validate the parameters entered by the user at
-// the command line when the program starts.
+// Validate 用于解析和验证用户在程序启动时在命令行输入的参数。
 func (s *SecureServingOptions) Validate() []error {
 	if s == nil {
 		return nil
@@ -76,8 +75,8 @@ func (s *SecureServingOptions) Validate() []error {
 	return errors
 }
 
-// AddFlags adds flags related to HTTPS server for a specific APIServer to the
-// specified FlagSet.
+// AddFlags 将与特定 API 服务器的 HTTPS 服务器相关的标志添加到
+// 指定的 FlagSet。
 func (s *SecureServingOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&s.BindAddress, fullPrefix+".bind-address", s.BindAddress, ""+
 		"The IP address on which to listen for the --"+fullPrefix+".bind-port port. The "+
@@ -109,7 +108,7 @@ func (s *SecureServingOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 			"File containing the default x509 private key matching --"+fullPrefix+".tls.cert-key.cert-file.")
 }
 
-// Complete fills in any fields not set that are required to have valid data.
+// Complete 填充未设置且需要具有有效数据的字段。
 func (s *SecureServingOptions) Complete() error {
 	if s == nil || s.BindPort == 0 {
 		return nil

@@ -17,22 +17,22 @@ const configFlagName = "config"
 
 var cfgFile string
 
-// AddConfigFlag adds flags for a specific server to the specified FlagSet object.
-// It also sets a passed functions to read values from configuration file into viper
-// when each cobra command's Execute method is called.
+// AddConfigFlag 为特定服务器将标志添加到指定的 FlagSet 对象。
+// 它还设置传递的函数，以便在调用每个 cobra 命令的 Execute 方法时
+// 将配置文件中的值读取到 viper 中。
 func AddConfigFlag(fs *pflag.FlagSet, name string, watch bool) {
 	fs.AddFlag(pflag.Lookup(configFlagName))
 
-	// Enable viper's automatic environment variable parsing. This means
-	// that viper will automatically read values corresponding to viper
-	// variables from environment variables.
+	// 启用 viper 的自动环境变量解析。这意味着
+	// viper 将自动从环境变量中读取与 viper
+	// 变量对应的值。
 	viper.AutomaticEnv()
-	// Set the environment variable prefix. Use the strings.ReplaceAll function
-	// to replace hyphens with underscores in the name, and use strings.ToUpper
-	// to convert the name to uppercase, then set it as the prefix for environment variables.
+	// 设置环境变量前缀。使用 strings.ReplaceAll 函数
+	// 将名称中的连字符替换为下划线，并使用 strings.ToUpper
+	// 将名称转换为大写，然后将其设置为环境变量的前缀。
 	viper.SetEnvPrefix(strings.ReplaceAll(strings.ToUpper(name), "-", "_"))
-	// Set the replacement rules for environment variable keys. Use the
-	// strings.NewReplacer function to specify replacing periods and hyphens with underscores.
+	// 设置环境变量键的替换规则。使用
+	// strings.NewReplacer 函数指定将句点和连字符替换为下划线。
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	cobra.OnInitialize(func() {
@@ -50,18 +50,18 @@ func AddConfigFlag(fs *pflag.FlagSet, name string, watch bool) {
 		}
 
 		if err := viper.ReadInConfig(); err != nil {
-			slog.LogAttrs(nil, slog.LevelDebug, "Failed to read configuration file",
+			slog.LogAttrs(nil, slog.LevelDebug, "读取配置文件失败",
 				slog.String("file", cfgFile),
 				slog.Any("err", err))
 		} else {
-			slog.LogAttrs(nil, slog.LevelDebug, "Success to read configuration file",
+			slog.LogAttrs(nil, slog.LevelDebug, "成功读取配置文件",
 				slog.String("file", viper.ConfigFileUsed()))
 		}
 
 		if watch {
 			viper.WatchConfig()
 			viper.OnConfigChange(func(e fsnotify.Event) {
-				slog.LogAttrs(nil, slog.LevelInfo, "Config file changed",
+				slog.LogAttrs(nil, slog.LevelInfo, "配置文件已更改",
 					slog.String("name", e.Name))
 			})
 		}
@@ -75,6 +75,6 @@ func PrintConfig() {
 }
 
 func init() {
-	pflag.StringVarP(&cfgFile, configFlagName, "c", cfgFile, "Read configuration from specified `FILE`, "+
-		"support JSON, TOML, YAML, HCL, or Java properties formats.")
+	pflag.StringVarP(&cfgFile, configFlagName, "c", cfgFile, "从指定的 `FILE` 读取配置，"+
+		"支持 JSON、TOML、YAML、HCL 或 Java properties 格式。")
 }

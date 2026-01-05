@@ -7,40 +7,40 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// IToken defines methods to implement a generic token.
+// IToken 定义了实现通用令牌的方法。
 type IToken interface {
-	// Get token string.
+	// 获取令牌字符串。
 	GetToken() string
-	// Get token type.
+	// 获取令牌类型。
 	GetTokenType() string
-	// Get token expiration timestamp.
+	// 获取令牌过期时间戳。
 	GetExpiresAt() int64
-	// JSON encoding
+	// JSON 编码。
 	EncodeToJSON() ([]byte, error)
 }
 
-// Authenticator defines methods used for token processing.
+// Authenticator 定义了用于令牌处理的方法。
 type Authenticator interface {
-	// Sign is used to generate a token.
+	// Sign 用于生成令牌。
 	Sign(ctx context.Context, userID string) (IToken, error)
 
-	// Destroy is used to destroy a token.
+	// Destroy 用于销毁令牌。
 	Destroy(ctx context.Context, accessToken string) error
 
-	// ParseClaims parse the token and return the claims.
+	// ParseClaims 解析令牌并返回声明。
 	ParseClaims(ctx context.Context, accessToken string) (*jwt.RegisteredClaims, error)
 
-	// Release used to release the requested resources.
+	// Release 用于释放请求的资源。
 	Release() error
 }
 
-// Encrypt encrypts the plain text with bcrypt.
+// Encrypt 使用 bcrypt 对明文进行加密。
 func Encrypt(source string) (string, error) {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(source), bcrypt.DefaultCost)
 	return string(hashedBytes), err
 }
 
-// Compare compares the encrypted text with the plain text if it's the same.
+// Compare 比较加密后的文本与明文是否相同。
 func Compare(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

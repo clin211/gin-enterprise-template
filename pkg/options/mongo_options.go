@@ -14,7 +14,7 @@ import (
 
 var _ IOptions = (*MongoOptions)(nil)
 
-// MongoOptions contains options for connecting to a MongoDB server.
+// MongoOptions 包含连接到 MongoDB 服务器的选项。
 type MongoOptions struct {
 	URL        string        `json:"url" mapstructure:"url"`
 	Database   string        `json:"database" mapstructure:"database"`
@@ -25,7 +25,7 @@ type MongoOptions struct {
 	TLSOptions *TLSOptions   `json:"tls" mapstructure:"tls"`
 }
 
-// NewMongoOptions create a `zero` value instance.
+// NewMongoOptions 创建一个`零值`实例。
 func NewMongoOptions() *MongoOptions {
 	return &MongoOptions{
 		Timeout:    30 * time.Second,
@@ -33,7 +33,7 @@ func NewMongoOptions() *MongoOptions {
 	}
 }
 
-// Validate verifies flags passed to MongoOptions.
+// Validate 验证传递给 MongoOptions 的标志。
 func (o *MongoOptions) Validate() []error {
 	errs := []error{}
 
@@ -56,7 +56,7 @@ func (o *MongoOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags adds flags related to redis storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 redis 存储相关的标志添加到指定的 FlagSet。
 func (o *MongoOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	o.TLSOptions.AddFlags(fs, fullPrefix+".tls")
 
@@ -68,9 +68,9 @@ func (o *MongoOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Password, fullPrefix+".password", o.Password, "Password of the MongoDB database (optional).")
 }
 
-// NewClient creates a new MongoDB client based on the provided options.
+// NewClient 根据提供的选项创建新的 MongoDB 客户端。
 func (o *MongoOptions) NewClient() (*mongo.Client, error) {
-	// Set client options
+	// 设置客户端选项
 	opts := options.Client().ApplyURI(o.URL).SetReadPreference(readpref.Primary())
 	if o.Timeout > 0 {
 		opts.SetConnectTimeout(o.Timeout).SetSocketTimeout(o.Timeout).SetServerSelectionTimeout(o.Timeout)
@@ -95,13 +95,13 @@ func (o *MongoOptions) NewClient() (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), o.Timeout)
 	defer cancel()
 
-	// Connect to MongoDB
+	// 连接到 MongoDB
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	// Ping the MongoDB server to check the connection
+	// Ping MongoDB 服务器以检查连接
 	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		return nil, err
 	}

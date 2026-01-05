@@ -9,18 +9,18 @@ const defaultABC = "abcdefghijklmnopqrstuvwxyz1234567890"
 type ResourceID string
 
 const (
-	// UserID defines the resource identifier for a user.
+	// UserID 定义用户的资源标识符。
 	UserID ResourceID = "user"
 )
 
-// String converts the resource identifier to a string.
+// String 将资源标识符转换为字符串。
 func (rid ResourceID) String() string {
 	return string(rid)
 }
 
-// New creates a unique identifier with a prefix.
+// New 创建带有前缀的唯一标识符。
 func (rid ResourceID) New(counter uint64) string {
-	// Generate a unique identifier using custom options.
+	// 使用自定义选项生成唯一标识符。
 	uniqueStr := id.NewCode(
 		counter,
 		id.WithCodeChars([]rune(defaultABC)),

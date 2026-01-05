@@ -5,33 +5,33 @@ import (
 	"github.com/clin211/gin-enterprise-template/pkg/logger"
 )
 
-// onexLogger provides an implementation of the logger.Logger interface.
+// onexLogger 提供 logger.Logger 接口的实现。
 type onexLogger struct{}
 
-// Ensure that onexLogger implements the logger.Logger interface.
+// 确保 onexLogger 实现了 logger.Logger 接口。
 var _ logger.Logger = (*onexLogger)(nil)
 
-// NewLogger creates a new instance of onexLogger.
+// NewLogger 创建一个新的 onexLogger 实例。
 func NewLogger() *onexLogger {
 	return &onexLogger{}
 }
 
-// Debug logs a debug message with any additional key-value pairs.
+// Debug 记录带有附加键值对的调试消息。
 func (l *onexLogger) Debug(msg string, kvs ...any) {
 	log.Debugw(msg, kvs...)
 }
 
-// Warn logs a warning message with any additional key-value pairs.
+// Warn 记录带有附加键值对的警告消息。
 func (l *onexLogger) Warn(msg string, kvs ...any) {
 	log.Warnw(msg, kvs...)
 }
 
-// Info logs an informational message with any additional key-value pairs.
+// Info 记录带有附加键值对的信息性消息。
 func (l *onexLogger) Info(msg string, kvs ...any) {
 	log.Infow(msg, kvs...)
 }
 
-// Error logs an error message with any additional key-value pairs.
+// Error 记录带有附加键值对的错误消息。
 func (l *onexLogger) Error(msg string, kvs ...any) {
 	log.Errorw(nil, msg, kvs...)
 }

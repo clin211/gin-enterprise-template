@@ -14,7 +14,7 @@ import (
 
 var _ IOptions = (*MySQLOptions)(nil)
 
-// MySQLOptions defines options for mysql database.
+// MySQLOptions 定义 mysql 数据库的选项。
 type MySQLOptions struct {
 	Addr                  string        `json:"addr,omitempty" mapstructure:"addr"`
 	Username              string        `json:"username,omitempty" mapstructure:"username"`
@@ -26,7 +26,7 @@ type MySQLOptions struct {
 	LogLevel              int           `json:"log-level" mapstructure:"log-level"`
 }
 
-// NewMySQLOptions create a `zero` value instance.
+// NewMySQLOptions 创建一个`零值`实例。
 func NewMySQLOptions() *MySQLOptions {
 	return &MySQLOptions{
 		Addr:                  "127.0.0.1:3306",
@@ -40,14 +40,14 @@ func NewMySQLOptions() *MySQLOptions {
 	}
 }
 
-// Validate verifies flags passed to MySQLOptions.
+// Validate 验证传递给 MySQLOptions 的标志。
 func (o *MySQLOptions) Validate() []error {
 	errs := []error{}
 
 	return errs
 }
 
-// AddFlags adds flags related to mysql storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 mysql 存储相关的标志添加到指定的 FlagSet。
 func (o *MySQLOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Addr, fullPrefix+".host", o.Addr, ""+
 		"MySQL service host address.")
@@ -66,7 +66,7 @@ func (o *MySQLOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 		"Specify gorm log level.")
 }
 
-// DSN return DSN from MySQLOptions.
+// DSN 从 MySQLOptions 返回 DSN。
 func (o *MySQLOptions) DSN() string {
 	return fmt.Sprintf(`%s:%s@tcp(%s)/%s?charset=utf8&parseTime=%t&loc=%s`,
 		o.Username,
@@ -77,7 +77,7 @@ func (o *MySQLOptions) DSN() string {
 		"Local")
 }
 
-// NewDB create mysql store with the given config.
+// NewDB 使用给定配置创建 mysql 存储。
 func (o *MySQLOptions) NewDB() (*gorm.DB, error) {
 	opts := &db.MySQLOptions{
 		Addr:                  o.Addr,

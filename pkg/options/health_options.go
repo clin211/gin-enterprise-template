@@ -12,15 +12,15 @@ import (
 
 var _ IOptions = (*HealthOptions)(nil)
 
-// HealthOptions defines options for redis cluster.
+// HealthOptions 定义 redis 集群的选项。
 type HealthOptions struct {
-	// Enable debugging by exposing profiling information.
+	// 通过公开分析信息来启用调试。
 	HTTPProfile        bool   `json:"enable-http-profiler" mapstructure:"enable-http-profiler"`
 	HealthCheckPath    string `json:"check-path" mapstructure:"check-path"`
 	HealthCheckAddress string `json:"check-address" mapstructure:"check-address"`
 }
 
-// NewHealthOptions create a `zero` value instance.
+// NewHealthOptions 创建一个`零值`实例。
 func NewHealthOptions() *HealthOptions {
 	return &HealthOptions{
 		HTTPProfile:        false,
@@ -29,14 +29,14 @@ func NewHealthOptions() *HealthOptions {
 	}
 }
 
-// Validate verifies flags passed to HealthOptions.
+// Validate 验证传递给 HealthOptions 的标志。
 func (o *HealthOptions) Validate() []error {
 	errs := []error{}
 
 	return errs
 }
 
-// AddFlags adds flags related to redis storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 redis 存储相关的标志添加到指定的 FlagSet。
 func (o *HealthOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.BoolVar(&o.HTTPProfile, fullPrefix+".enable-http-profiler", o.HTTPProfile, "Expose runtime profiling data via HTTP.")
 	fs.StringVar(&o.HealthCheckPath, fullPrefix+".check-path", o.HealthCheckPath, "Specifies liveness health check request path.")

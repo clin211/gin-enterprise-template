@@ -13,7 +13,7 @@ import (
 
 var _ IOptions = (*PostgreSQLOptions)(nil)
 
-// PostgreSQLOptions defines options for postgresql database.
+// PostgreSQLOptions 定义 postgresql 数据库的选项。
 type PostgreSQLOptions struct {
 	Addr                  string        `json:"addr,omitempty" mapstructure:"addr"`
 	Username              string        `json:"username,omitempty" mapstructure:"username"`
@@ -25,7 +25,7 @@ type PostgreSQLOptions struct {
 	LogLevel              int           `json:"log-level" mapstructure:"log-level"`
 }
 
-// NewPostgreSQLOptions create a `zero` value instance.
+// NewPostgreSQLOptions 创建一个`零值`实例。
 func NewPostgreSQLOptions() *PostgreSQLOptions {
 	return &PostgreSQLOptions{
 		Addr:                  "127.0.0.1:5432",
@@ -39,14 +39,14 @@ func NewPostgreSQLOptions() *PostgreSQLOptions {
 	}
 }
 
-// Validate verifies flags passed to PostgreSQLOptions.
+// Validate 验证传递给 PostgreSQLOptions 的标志。
 func (o *PostgreSQLOptions) Validate() []error {
 	errs := []error{}
 
 	return errs
 }
 
-// AddFlags adds flags related to postgresql storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 postgresql 存储相关的标志添加到指定的 FlagSet。
 func (o *PostgreSQLOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Addr, fullPrefix+".addr", o.Addr, ""+
 		"PostgreSQL service address. If left blank, the following related postgresql options will be ignored.")
@@ -65,7 +65,7 @@ func (o *PostgreSQLOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 		"Specify gorm log level.")
 }
 
-// NewDB create postgresql store with the given config.
+// NewDB 使用给定配置创建 postgresql 存储。
 func (o *PostgreSQLOptions) NewDB() (*gorm.DB, error) {
 	opts := &db.PostgreSQLOptions{
 		Addr:                  o.Addr,

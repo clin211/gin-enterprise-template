@@ -5,17 +5,17 @@ import (
 	"time"
 )
 
-// Storer token storage interface.
+// Storer 令牌存储接口。
 type Storer interface {
-	// Store token data and specify expiration time.
+	// 存储令牌数据并指定过期时间。
 	Set(ctx context.Context, accessToken string, expiration time.Duration) error
 
-	// Delete token data from storage.
+	// 从存储中删除令牌数据。
 	Delete(ctx context.Context, accessToken string) (bool, error)
 
-	// Check if token exists.
+	// 检查令牌是否存在。
 	Check(ctx context.Context, accessToken string) (bool, error)
 
-	// Close the storage.
+	// 关闭存储连接。
 	Close() error
 }

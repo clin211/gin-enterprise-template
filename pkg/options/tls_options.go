@@ -12,9 +12,9 @@ import (
 
 var _ IOptions = (*TLSOptions)(nil)
 
-// TLSOptions is the TLS cert info for serving secure traffic.
+// TLSOptions 是用于提供安全流量的 TLS 证书信息。
 type TLSOptions struct {
-	// UseTLS specifies whether should be encrypted with TLS if possible.
+	// UseTLS 指定如果可能是否应使用 TLS 加密。
 	UseTLS             bool   `json:"use-tls" mapstructure:"use-tls"`
 	InsecureSkipVerify bool   `json:"insecure-skip-verify" mapstructure:"insecure-skip-verify"`
 	CaCert             string `json:"ca-cert" mapstructure:"ca-cert"`
@@ -22,12 +22,12 @@ type TLSOptions struct {
 	Key                string `json:"key" mapstructure:"key"`
 }
 
-// NewTLSOptions create a `zero` value instance.
+// NewTLSOptions 创建一个`零值`实例。
 func NewTLSOptions() *TLSOptions {
 	return &TLSOptions{}
 }
 
-// Validate verifies flags passed to TLSOptions.
+// Validate 验证传递给 TLSOptions 的标志。
 func (o *TLSOptions) Validate() []error {
 	errs := []error{}
 
@@ -42,7 +42,7 @@ func (o *TLSOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags adds flags related to redis storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 redis 存储相关的标志添加到指定的 FlagSet。
 func (o *TLSOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.BoolVar(&o.UseTLS, fullPrefix+".use-tls", o.UseTLS, "Use tls transport to connect the server.")
 	fs.BoolVar(&o.InsecureSkipVerify, fullPrefix+".insecure-skip-verify", o.InsecureSkipVerify, ""+

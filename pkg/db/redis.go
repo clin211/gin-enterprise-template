@@ -7,7 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedisOptions defines options for redis database.
+// RedisOptions 定义 Redis 数据库的配置选项.
 type RedisOptions struct {
 	Addr         string
 	Username     string
@@ -22,7 +22,7 @@ type RedisOptions struct {
 	PoolSize     int
 }
 
-// NewRedis create a new redis db instance with the given options.
+// NewRedis 使用给定的选项创建一个新的 Redis 数据库实例.
 func NewRedis(opts *RedisOptions) (*redis.Client, error) {
 	options := &redis.Options{
 		Addr:         opts.Addr,
@@ -40,7 +40,7 @@ func NewRedis(opts *RedisOptions) (*redis.Client, error) {
 
 	rdb := redis.NewClient(options)
 
-	// check redis if is ok
+	// 检查 Redis 是否正常工作
 	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
 		return nil, err
 	}

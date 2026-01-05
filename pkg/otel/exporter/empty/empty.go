@@ -6,25 +6,25 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-// Exporter implements sdktrace.SpanExporter.
+// Exporter 实现了 sdktrace.SpanExporter。
 type Exporter struct{}
 
-// Ensure Exporter implements sdktrace.SpanExporter.
+// 确保 Exporter 实现了 sdktrace.SpanExporter。
 var _ sdktrace.SpanExporter = (*Exporter)(nil)
 
-// ExportSpans logs completed spans using slog.
+// ExportSpans 使用 slog 记录已完成的 span。
 func (e *Exporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnlySpan) error {
 	return nil
 }
 
-// Shutdown closes the logger if needed (noop here).
+// Shutdown 如果需要则关闭 logger（此处为空操作）。
 func (e *Exporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// NewEmptyExporter creates and returns a new instance of Exporter that satisfies
-// the OpenTelemetry sdktrace.SpanExporter interface but does not output, store,
-// or forward any span data.
+// NewEmptyExporter 创建并返回一个新的 Exporter 实例，该实例满足
+// OpenTelemetry sdktrace.SpanExporter 接口，但不输出、存储
+// 或转发任何 span 数据。
 func NewEmptyExporter() *Exporter {
 	return &Exporter{}
 }

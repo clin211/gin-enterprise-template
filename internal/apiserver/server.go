@@ -23,7 +23,7 @@ import (
 	"github.com/clin211/gin-enterprise-template/pkg/token"
 )
 
-// Config contains application-related configurations.
+// Config 包含应用程序相关的配置。
 type Config struct {
 	JWTOptions        *genericoptions.JWTOptions
 	TLSOptions        *genericoptions.TLSOptions
@@ -32,13 +32,13 @@ type Config struct {
 	RedisOptions      *genericoptions.RedisOptions
 }
 
-// Server represents the web server.
+// Server 表示 Web 服务器。
 type Server struct {
 	cfg *ServerConfig
 	srv server.Server
 }
 
-// ServerConfig contains the core dependencies and configurations of the server.
+// ServerConfig 包含服务器的核心依赖和配置。
 type ServerConfig struct {
 	*Config
 	biz       biz.IBiz
@@ -47,7 +47,7 @@ type ServerConfig struct {
 	authz     *authz.Authz
 }
 
-// NewServer initializes and returns a new Server instance.
+// NewServer 初始化并返回一个新的 Server 实例。
 func (cfg *Config) NewServer(ctx context.Context) (*Server, error) {
 	where.RegisterTenant("user_id", func(ctx context.Context) string {
 		return contextx.UserID(ctx)
@@ -60,20 +60,20 @@ func (cfg *Config) NewServer(ctx context.Context) (*Server, error) {
 		cfg.JWTOptions.RefreshExpiration,
 		token.WithIdentityKey(known.XUserID),
 	)
-	// Create the core server instance.
+	// 创建核心服务器实例。
 	return NewServer(cfg)
 }
 
-// Run starts the server and listens for termination signals.
-// It gracefully shuts down the server upon receiving a termination signal.
+// Run 启动服务器并监听终止信号。
+// 在收到终止信号时，它会优雅地关闭服务器。
 func (s *Server) Run(ctx context.Context) error {
-	// Start serving in background.
+	// 在后台启动服务。
 	go s.srv.RunOrDie()
 
-	// Block until the context is canceled or terminated.
-	// The following code is used to perform some cleanup tasks when the server shuts down.
+	// 阻塞直到上下文被取消或终止。
+	// 以下代码用于在服务器关闭时执行一些清理任务。
 	<-ctx.Done()
-	slog.Info("Shutting down server...") // Graceful stop server with timeout derived from ctx.
+	slog.Info("Shutting down server...") // 根据 ctx 派生的超时时间优雅停止服务器。
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	s.srv.GracefulStop(ctx)
@@ -83,7 +83,7 @@ func (s *Server) Run(ctx context.Context) error {
 	return nil
 }
 
-// NewDB creates and returns a *gorm.DB instance for MySQL.
+// NewDB 创建并返回一个用于 PostgreSQL 的 *gorm.DB 实例。
 func (cfg *Config) NewDB() (*gorm.DB, error) {
 	slog.Info("Initializing database connection", "type", "postgresql")
 	db, err := cfg.PostgreSQLOptions.NewDB()
@@ -92,7 +92,7 @@ func (cfg *Config) NewDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Automatically migrate database schema
+	// 自动迁移数据库模式
 	if err := registry.Migrate(db); err != nil {
 		slog.Error("Failed to migrate database schema", "error", err)
 		return nil, err
@@ -111,12 +111,12 @@ func (r *UserRetriever) GetUser(ctx context.Context, userID string) (*model.User
 	return r.store.User().Get(ctx, where.F("user_id", userID))
 }
 
-// ProvideDB provides a database instance based on the configuration.
+// ProvideDB 根据配置提供数据库实例。
 func ProvideDB(cfg *Config) (*gorm.DB, error) {
 	return cfg.NewDB()
 }
 
-// ProvideRedis provides a redis instance based on the configuration.
+// ProvideRedis 根据配置提供 redis 实例。
 func ProvideRedis(cfg *Config) (*redis.Client, error) {
 	return cfg.RedisOptions.NewClient()
 }

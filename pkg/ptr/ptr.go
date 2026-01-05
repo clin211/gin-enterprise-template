@@ -5,12 +5,12 @@ import (
 	"reflect"
 )
 
-// AllPtrFieldsNil tests whether all pointer fields in a struct are nil.  This is useful when,
-// for example, an API struct is handled by plugins which need to distinguish
-// "no plugin accepted this spec" from "this spec is empty".
+// AllPtrFieldsNil 检查结构体中所有指针字段是否都为 nil。这在以下场景很有用：
+// 例如，当一个 API 结构体由插件处理时，插件需要区分
+// "没有插件接受此规范"和"此规范为空"的情况。
 //
-// This function is only valid for structs and pointers to structs.  Any other
-// type will cause a panic.  Passing a typed nil pointer will return true.
+// 此函数仅对结构体和指向结构体的指针有效。任何其他类型
+// 都会导致 panic。传入类型化的 nil 指针将返回 true。
 func AllPtrFieldsNil(obj interface{}) bool {
 	v := reflect.ValueOf(obj)
 	if !v.IsValid() {
@@ -30,13 +30,13 @@ func AllPtrFieldsNil(obj interface{}) bool {
 	return true
 }
 
-// To returns a pointer to the given value.
+// To 返回指向给定值的指针。
 func To[T any](v T) *T {
 	return &v
 }
 
-// From returns the value pointed to by the pointer p.
-// If the pointer is nil, returns the zero value of T instead.
+// From 返回指针 p 指向的值。
+// 如果指针为 nil，则返回 T 的零值。
 func From[T any](v *T) T {
 	var zero T
 	if v != nil {
@@ -46,8 +46,8 @@ func From[T any](v *T) T {
 	return zero
 }
 
-// FromOr dereferences ptr and returns the value it points to if no nil, or else
-// returns def.
+// FromOr 解引用 ptr 并返回其指向的值（如果不为 nil），否则
+// 返回 def。
 func FromOr[T any](ptr *T, def T) T {
 	if ptr != nil {
 		return *ptr
@@ -55,24 +55,24 @@ func FromOr[T any](ptr *T, def T) T {
 	return def
 }
 
-// IsNil returns whether the given pointer v is nil.
+// IsNil 返回给定指针 v 是否为 nil。
 func IsNil[T any](p *T) bool {
 	return p == nil
 }
 
-// IsNotNil is negation of [IsNil].
+// IsNotNil 是 [IsNil] 的否定形式。
 func IsNotNil[T any](p *T) bool {
 	return p != nil
 }
 
-// Clone returns a shallow copy of the slice.
-// If the given pointer is nil, nil is returned.
+// Clone 返回该值的浅拷贝。
+// 如果给定的指针为 nil，则返回 nil。
 //
-// HINT: The element is copied using assignment (=), so this is a shallow clone.
-// If you want to do a deep clone, use [CloneBy] with an appropriate element
-// clone function.
+// 提示：元素是通过赋值（=）复制的，因此这是浅拷贝。
+// 如果要进行深拷贝，请使用 [CloneBy] 并传入适当的元素
+// 克隆函数。
 //
-// AKA: Copy
+// 别名：Copy
 func Clone[T any](p *T) *T {
 	if p == nil {
 		return nil
@@ -81,15 +81,15 @@ func Clone[T any](p *T) *T {
 	return &clone
 }
 
-// CloneBy is variant of [Clone], it returns a copy of the map.
-// Element is copied using function f.
-// If the given pointer is nil, nil is returned.
+// CloneBy 是 [Clone] 的变体，它返回该值的拷贝。
+// 元素使用函数 f 进行复制。
+// 如果给定的指针为 nil，则返回 nil。
 func CloneBy[T any](p *T, f func(T) T) *T {
 	return Map(p, f)
 }
 
-// Equal returns true if both arguments are nil or both arguments
-// dereference to the same value.
+// Equal 如果两个参数都为 nil 或两个参数解引用后
+// 的值相等，则返回 true。
 func Equal[T comparable](a, b *T) bool {
 	if (a == nil) != (b == nil) {
 		return false
@@ -100,24 +100,24 @@ func Equal[T comparable](a, b *T) bool {
 	return *a == *b
 }
 
-// EqualTo returns whether the value of pointer p is equal to value v.
-// It a shortcut of "x != nil && *x == y".
+// EqualTo 返回指针 p 的值是否等于值 v。
+// 这是 "x != nil && *x == y" 的简写形式。
 //
-// EXAMPLE:
+// 示例：
 //
 //	x, y := 1, 2
 //	Equal(&x, 1)   ⏩  true
-//	Equal(&y, 1)   ⏩n false
+//	Equal(&y, 1)   ⏩  false
 //	Equal(nil, 1)  ⏩  false
 func EqualTo[T comparable](p *T, v T) bool {
 	return p != nil && *p == v
 }
 
-// Map applies function f to element of pointer p.
-// If p is nil, f will not be called and nil is returned, otherwise,
-// result of f are returned as a new pointer.
+// Map 将函数 f 应用于指针 p 的元素。
+// 如果 p 为 nil，则不会调用 f 并返回 nil，否则，
+// 将 f 的结果作为新指针返回。
 //
-// EXAMPLE:
+// 示例：
 //
 //	i := 1
 //	Map(&i, strconv.Itoa)       ⏩  (*string)("1")

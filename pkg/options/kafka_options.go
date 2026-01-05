@@ -27,138 +27,129 @@ func (l *logger) Printf(format string, args ...any) {
 }
 
 type WriterOptions struct {
-	// Limit on how many attempts will be made to deliver a message.
+	// 限制传递消息的最大尝试次数。
 	//
-	// The default is to try at most 10 times.
+	// 默认最多尝试 10 次。
 	MaxAttempts int `mapstructure:"max-attempts"`
 
-	// Number of acknowledges from partition replicas required before receiving
-	// a response to a produce request. The default is -1, which means to wait for
-	// all replicas, and a value above 0 is required to indicate how many replicas
-	// should acknowledge a message to be considered successful.
+	// 在接收到生成请求的响应之前，需要分区副本确认的数量。
+	// 默认为 -1，表示等待所有副本，大于 0 的值表示需要确认消息成功的副本数。
 	//
-	// This version of kafka-go (v0.3) does not support 0 required acks, due to
-	// some internal complexity implementing this with the Kafka protocol. If you
-	// need that functionality specifically, you'll need to upgrade to v0.4.
+	// 此版本的 kafka-go (v0.3) 不支持 0 个必需的确认，由于
+	// 使用 Kafka 协议实现它的一些内部复杂性。如果您
+	// 特别需要该功能，则需要升级到 v0.4。
 	RequiredAcks int `mapstructure:"required-acks"`
 
-	// Setting this flag to true causes the WriteMessages method to never block.
-	// It also means that errors are ignored since the caller will not receive
-	// the returned value. Use this only if you don't care about guarantees of
-	// whether the messages were written to kafka.
+	// 将此标志设置为 true 会导致 WriteMessages 方法永不阻塞。
+	// 这也意味着错误将被忽略，因为调用者不会收到
+	// 返回值。仅在您不关心消息是否写入 kafka 的保证时使用此选项。
 	Async bool `mapstructure:"async"`
 
-	// Limit on how many messages will be buffered before being sent to a
-	// partition.
+	// 限制在发送到分区之前缓冲的消息数量。
 	//
-	// The default is to use a target batch size of 100 messages.
+	// 默认使用目标批处理大小为 100 条消息。
 	BatchSize int `mapstructure:"batch-size"`
 
-	// Time limit on how often incomplete message batches will be flushed to
-	// kafka.
+	// 不完整的消息批次刷新到 kafka 的时间限制。
 	//
-	// The default is to flush at least every second.
+	// 默认至少每秒刷新一次。
 	BatchTimeout time.Duration `mapstructure:"batch-timeout"`
 
-	// Limit the maximum size of a request in bytes before being sent to
-	// a partition.
+	// 在发送到分区之前限制请求的最大字节大小。
 	//
-	// The default is to use a kafka default value of 1048576.
+	// 默认使用 kafka 默认值 1048576。
 	BatchBytes int `mapstructure:"batch-bytes"`
 }
 
 type ReaderOptions struct {
-	// GroupID holds the optional consumer group id. If GroupID is specified, then
-	// Partition should NOT be specified e.g. 0
+	// GroupID 保存可选的消费者组 ID。如果指定了 GroupID，则
+	// 不应指定 Partition，例如 0
 	GroupID string `mapstructure:"group-id"`
 
-	// GroupTopics allows specifying multiple topics, but can only be used in
-	// combination with GroupID, as it is a consumer-group feature. As such, if
-	// GroupID is set, then either Topic or GroupTopics must be defined.
+	// GroupTopics 允许指定多个主题，但只能与
+	// GroupID 结合使用，因为它是消费者组功能。因此，如果
+	// 设置了 GroupID，则必须定义 Topic 或 GroupTopics。
 	// GroupTopics []string
 
-	// Partition to read messages from.  Either Partition or GroupID may
-	// be assigned, but not both
+	// 要从中读取消息的分区。可以分配 Partition 或 GroupID
+	// 中的一个，但不能同时分配两者
 	Partition int `mapstructure:"partition"`
 
-	// The capacity of the internal message queue, defaults to 100 if none is
-	// set.
+	// 内部消息队列的容量，如果未设置，则默认为 100。
 	QueueCapacity int `mapstructure:"queue-capacity"`
 
-	// MinBytes indicates to the broker the minimum batch size that the consumer
-	// will accept. Setting a high minimum when consuming from a low-volume topic
-	// may result in delayed delivery when the broker does not have enough data to
-	// satisfy the defined minimum.
+	// MinBytes 向代理指示消费者将接受的最小批次大小。
+	// 从低量主题消费时设置较高的最小值可能会导致
+	// 传递延迟，因为代理没有足够的数据来满足定义的最小值。
 	//
-	// Default: 1
+	// 默认值：1
 	MinBytes int `mapstructure:"min-bytes"`
 
-	// MaxBytes indicates to the broker the maximum batch size that the consumer
-	// will accept. The broker will truncate a message to satisfy this maximum, so
-	// choose a value that is high enough for your largest message size.
+	// MaxBytes 向代理指示消费者将接受的最大批次大小。
+	// 代理将截断消息以满足此最大值，因此
+	// 选择一个对于最大消息大小来说足够高的值。
 	//
-	// Default: 1MB
+	// 默认值：1MB
 	MaxBytes int `mapstructure:"max-bytes"`
 
-	// Maximum amount of time to wait for new data to come when fetching batches
-	// of messages from kafka.
+	// 从 kafka 获取消息批次时等待新数据的最长时间。
 	//
-	// Default: 10s
+	// 默认值：10s
 	MaxWait time.Duration `mapstructure:"max-wait"`
 
-	// ReadBatchTimeout amount of time to wait to fetch message from kafka messages batch.
+	// ReadBatchTimeout 等待从 kafka 消息批次获取消息的时间量。
 	//
-	// Default: 10s
+	// 默认值：10s
 	ReadBatchTimeout time.Duration `mapstructure:"read-batch-timeout"`
 
-	// ReadLagInterval sets the frequency at which the reader lag is updated.
-	// Setting this field to a negative value disables lag reporting.
+	// ReadLagInterval 设置更新 reader 滞后的频率。
+	// 将此字段设置为负值将禁用滞后报告。
 	// ReadLagInterval time.Duration
 
-	// HeartbeatInterval sets the optional frequency at which the reader sends the consumer
-	// group heartbeat update.
+	// HeartbeatInterval 设置 reader 向消费者
+	// 组发送心跳更新的可选频率。
 	//
-	// Default: 3s
+	// 默认值：3s
 	//
-	// Only used when GroupID is set
+	// 仅在设置 GroupID 时使用
 	HeartbeatInterval time.Duration `mapstructure:"heartbeat-interval"`
 
-	// CommitInterval indicates the interval at which offsets are committed to
-	// the broker.  If 0, commits will be handled synchronously.
+	// CommitInterval 指示偏移量提交到
+	// 代理的间隔。如果为 0，则将同步处理提交。
 	//
-	// Default: 0
+	// 默认值：0
 	//
-	// Only used when GroupID is set
+	// 仅在设置 GroupID 时使用
 	CommitInterval time.Duration `mapstructure:"commit-interval"`
 
-	// RebalanceTimeout optionally sets the length of time the coordinator will wait
-	// for members to join as part of a rebalance.  For kafka servers under higher
-	// load, it may be useful to set this value higher.
+	// RebalanceTimeout 可选地设置协调器在重新平衡期间
+	// 等待成员加入的时间长度。对于负载较高的 kafka 服务器，
+	// 将此值设置得更高可能很有用。
 	//
-	// Default: 30s
+	// 默认值：30s
 	//
-	// Only used when GroupID is set
+	// 仅在设置 GroupID 时使用
 	RebalanceTimeout time.Duration `mapstructure:"rebalance-timeout"`
 
-	// StartOffset determines from whence the consumer group should begin
-	// consuming when it finds a partition without a committed offset.  If
-	// non-zero, it must be set to one of FirstOffset or LastOffset.
+	// StartOffset 确定消费者组在发现没有提交偏移量的分区时应
+	// 从哪里开始消费。如果
+	// 非零，则必须设置为 FirstOffset 或 LastOffset 之一。
 	//
-	// Default: FirstOffset
+	// 默认值：FirstOffset
 	//
-	// Only used when GroupID is set
+	// 仅在设置 GroupID 时使用
 	StartOffset int64 `mapstructure:"start-offset"`
 
-	// Limit of how many attempts will be made before delivering the error.
+	// 在传递错误之前将进行的最大尝试次数限制。
 	//
-	// The default is to try 3 times.
+	// 默认尝试 3 次。
 	MaxAttempts int `mapstructure:"max-attempts"`
 }
 
-// KafkaOptions defines options for kafka cluster.
-// Common options for kafka-go reader and writer.
+// KafkaOptions 定义 kafka 集群的选项。
+// kafka-go reader 和 writer 的通用选项。
 type KafkaOptions struct {
-	// kafka-go reader and writer common options
+	// kafka-go reader 和 writer 通用选项
 	Brokers       []string      `mapstructure:"brokers"`
 	Topic         string        `mapstructure:"topic"`
 	ClientID      string        `mapstructure:"client-id"`
@@ -170,14 +161,14 @@ type KafkaOptions struct {
 	Algorithm     string        `mapstructure:"algorithm"`
 	Compressed    bool          `mapstructure:"compressed"`
 
-	// kafka-go writer options
+	// kafka-go writer 选项
 	WriterOptions WriterOptions `mapstructure:"writer"`
 
-	// kafka-go reader options
+	// kafka-go reader 选项
 	ReaderOptions ReaderOptions `mapstructure:"reader"`
 }
 
-// NewKafkaOptions create a `zero` value instance.
+// NewKafkaOptions 创建一个`零值`实例。
 func NewKafkaOptions() *KafkaOptions {
 	return &KafkaOptions{
 		TLSOptions: NewTLSOptions(),
@@ -205,7 +196,7 @@ func NewKafkaOptions() *KafkaOptions {
 	}
 }
 
-// Validate verifies flags passed to KafkaOptions.
+// Validate 验证传递给 KafkaOptions 的标志。
 func (o *KafkaOptions) Validate() []error {
 	errs := []error{}
 
@@ -238,7 +229,7 @@ func (o *KafkaOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags adds flags related to redis storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 redis 存储相关的标志添加到指定的 FlagSet。
 func (o *KafkaOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	o.TLSOptions.AddFlags(fs, fullPrefix+".tls")
 

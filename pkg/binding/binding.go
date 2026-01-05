@@ -7,35 +7,35 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
-// Internal package variables
+// 内部包变量
 var (
-	// originalValidator stores the original Gin validator for use in final validation
+	// originalValidator 存储原始的 Gin 验证器，用于最终验证
 	originalValidator binding.StructValidator
 
-	// initOnce ensures the validator is captured only once
+	// initOnce 确保验证器只被捕获一次
 	initOnce sync.Once
 )
 
-// init captures the original validator and sets the global validator to nil.
-// This happens at package import time and only once.
+// init 捕获原始验证器并将全局验证器设置为 nil。
+// 这在包导入时发生，且只发生一次。
 func init() {
-	// Use Once to ensure this only happens once even if multiple goroutines enter simultaneously
+	// 使用 Once 确保即使多个 goroutine 同时进入也只执行一次
 	initOnce.Do(func() {
-		// Save original validator
+		// 保存原始验证器
 		originalValidator = binding.Validator
 
-		// Set global validator to nil to skip validation during binding
+		// 将全局验证器设置为 nil 以在绑定期间跳过验证
 		binding.Validator = nil
 	})
 }
 
-// Bind processes data from multiple sources without validating between each step,
-// then performs a single validation at the end.
+// Bind 处理来自多个源的数据，不在每个步骤之间进行验证，
+// 然后在最后执行一次验证。
 //
-// This solves the problem where binding from one source (e.g., URI) fails validation
-// because fields from another source (e.g., JSON) haven't been bound yet.
+// 这解决了从一个源（例如 URI）绑定失败的问题，
+// 因为来自另一个源（例如 JSON）的字段尚未绑定。
 //
-// Example usage:
+// 示例用法：
 //
 //	var req UserUpdateRequest
 //	if err := binding.Bind(c, &req, binding.URI, binding.JSON); err != nil {
@@ -43,14 +43,14 @@ func init() {
 //	    return
 //	}
 func Bind(c *gin.Context, obj interface{}, bindFuncs ...func(*gin.Context, interface{}) error) error {
-	// Execute all binding functions (validation is already disabled)
+	// 执行所有绑定函数（验证已被禁用）
 	for _, bindFunc := range bindFuncs {
 		if err := bindFunc(c, obj); err != nil {
-			return err // Returns parsing errors but not validation errors
+			return err // 返回解析错误但不返回验证错误
 		}
 	}
 
-	// Perform validation manually after all bindings are complete
+	// 在所有绑定完成后手动执行验证
 	if originalValidator != nil {
 		return originalValidator.ValidateStruct(obj)
 	}
@@ -58,16 +58,16 @@ func Bind(c *gin.Context, obj interface{}, bindFuncs ...func(*gin.Context, inter
 	return nil
 }
 
-// Common binding functions for use with Bind
+// 用于 Bind 的通用绑定函数
 
-// URI binds URI parameters to the given object.
-// Uses Gin's ShouldBindUri but without validation.
+// URI 将 URI 参数绑定到给定对象。
+// 使用 Gin 的 ShouldBindUri 但不进行验证。
 func URI(c *gin.Context, obj interface{}) error {
 	return c.ShouldBindUri(obj)
 }
 
-// JSON binds JSON body to the given object.
-// Uses Gin's ShouldBindJSON but without validation.
+// JSON 将 JSON 请求体绑定到给定对象。
+// 使用 Gin 的 ShouldBindJSON 但不进行验证。
 func JSON(c *gin.Context, obj interface{}) error {
 	return c.ShouldBindJSON(obj)
 }

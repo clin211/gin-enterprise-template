@@ -5,9 +5,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// BeforeCreate encrypts the plaintext password before creating a database record.
+// BeforeCreate 在创建数据库记录之前加密明文密码。
 func (m *UserM) BeforeCreate(tx *gorm.DB) error {
-	// Encrypt the user password.
+	// 加密用户密码。
 	var err error
 	m.Password, err = authn.Encrypt(m.Password)
 	if err != nil {

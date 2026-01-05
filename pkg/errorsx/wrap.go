@@ -4,33 +4,27 @@ import (
 	"errors"
 )
 
-// Is reports whether any error in err's chain matches target.
+// Is 报告 err 链中的任何错误是否匹配 target。
 //
-// The chain consists of err itself followed by the sequence of errors obtained by
-// repeatedly calling Unwrap.
+// 该链由 err 本身以及通过重复调用 Unwrap 获得的错误序列组成。
 //
-// An error is considered to match a target if it is equal to that target or if
-// it implements a method Is(error) bool such that Is(target) returns true.
+// 如果错误等于目标错误，或者错误实现了 Is(error) bool 方法且
+// Is(target) 返回 true，则认为该错误匹配目标。
 func Is(err, target error) bool { return errors.Is(err, target) }
 
-// As finds the first error in err's chain that matches target, and if so, sets
-// target to that error value and returns true.
+// As 在 err 的链中查找第一个匹配 target 的错误，如果找到，将 target 设置为该错误值并返回 true。
 //
-// The chain consists of err itself followed by the sequence of errors obtained by
-// repeatedly calling Unwrap.
+// 该链由 err 本身以及通过重复调用 Unwrap 获得的错误序列组成。
 //
-// An error matches target if the error's concrete value is assignable to the value
-// pointed to by target, or if the error has a method As(interface{}) bool such that
-// As(target) returns true. In the latter case, the As method is responsible for
-// setting target.
+// 如果错误的具体值可赋值给 target 指向的值，或者错误具有 As(interface{}) bool 方法
+// 且 As(target) 返回 true，则错误匹配 target。在后一种情况下，As 方法负责设置 target。
 //
-// As will panic if target is not a non-nil pointer to either a type that implements
-// error, or to any interface type. As returns false if err is nil.
+// 如果 target 不是指向实现 error 的类型的非空指针，或不是指向任何接口类型的指针，As 将 panic。
+// 如果 err 为 nil，As 返回 false。
 func As(err error, target interface{}) bool { return errors.As(err, target) }
 
-// Unwrap returns the result of calling the Unwrap method on err, if err's
-// type contains an Unwrap method returning error.
-// Otherwise, Unwrap returns nil.
+// Unwrap 返回在 err 上调用 Unwrap 方法的结果，如果 err 的类型包含返回 error 的 Unwrap 方法。
+// 否则，Unwrap 返回 nil。
 func Unwrap(err error) error {
 	return errors.Unwrap(err)
 }

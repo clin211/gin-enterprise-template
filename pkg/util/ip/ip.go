@@ -5,21 +5,21 @@ import (
 	"net/http"
 )
 
-// Define http headers.
+// 定义 HTTP 头部。
 const (
 	XForwardedFor = "X-Forwarded-For"
 	XRealIP       = "X-Real-IP"
 	XClientIP     = "x-client-ip"
 )
 
-// GetLocalIP returns the non loopback local IP of the host.
+// GetLocalIP 返回主机的非环回本地 IP。
 func GetLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return "127.0.0.1"
 	}
 	for _, address := range addrs {
-		// check the address type and if it is not a loopback the display it
+		// 检查地址类型，如果不是环回地址则显示它
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
 				return ipnet.IP.String()
@@ -29,7 +29,7 @@ func GetLocalIP() string {
 	return "127.0.0.1"
 }
 
-// RemoteIP returns the remote ip of the request.
+// RemoteIP 返回请求的远程 IP。
 func RemoteIP(req *http.Request) string {
 	remoteAddr := req.RemoteAddr
 	if ip := req.Header.Get(XClientIP); ip != "" {

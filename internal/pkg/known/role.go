@@ -1,8 +1,8 @@
 package known
 
 const (
-	// Role for regular users.
+	// 普通用户的角色。
 	RoleUser = "role::user"
-	// Role for administrators.
+	// 管理员的角色。
 	RoleAdmin = "role::admin"
 )

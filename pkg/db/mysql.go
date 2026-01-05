@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// MySQLOptions defines options for mysql database.
+// MySQLOptions 定义 MySQL 数据库的配置选项.
 type MySQLOptions struct {
 	Addr                  string
 	Username              string
@@ -27,7 +27,7 @@ type MySQLOptions struct {
 	Location string
 }
 
-// DSN return DSN from MySQLOptions.
+// DSN 从 MySQLOptions 返回数据源名称(DSN).
 func (o *MySQLOptions) DSN() string {
 	loc := o.Location
 	if loc == "" {
@@ -42,14 +42,14 @@ func (o *MySQLOptions) DSN() string {
 		loc)
 }
 
-// NewMySQL create a new gorm db instance with the given options.
+// NewMySQL 使用给定的选项创建一个新的 gorm 数据库实例.
 func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
-	// Set default values to ensure all fields in opts are available.
+	// 设置默认值以确保 opts 中的所有字段都可用.
 	setMySQLDefaults(opts)
 
 	db, err := gorm.Open(mysql.Open(opts.DSN()), &gorm.Config{
-		// PrepareStmt executes the given query in cached statement.
-		// This can improve performance.
+		// PrepareStmt 在缓存语句中执行给定的查询.
+		// 这可以提高性能.
 		PrepareStmt: true,
 		Logger:      opts.Logger,
 	})
@@ -62,19 +62,19 @@ func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	// SetMaxOpenConns 设置数据库的最大打开连接数.
 	sqlDB.SetMaxOpenConns(opts.MaxOpenConnections)
 
-	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
+	// SetConnMaxLifetime 设置连接可重用的最长时间.
 	sqlDB.SetConnMaxLifetime(opts.MaxConnectionLifeTime)
 
-	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	// SetMaxIdleConns 设置空闲连接池中的最大连接数.
 	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
 
 	return db, nil
 }
 
-// setMySQLDefaults set available default values for some fields.
+// setMySQLDefaults 为某些字段设置可用的默认值.
 func setMySQLDefaults(opts *MySQLOptions) {
 	if opts.Addr == "" {
 		opts.Addr = "127.0.0.1:3306"

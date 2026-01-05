@@ -14,15 +14,15 @@ import (
 
 var _ IOptions = (*JaegerOptions)(nil)
 
-// JaegerOptions defines options for Jaeger client.
+// JaegerOptions 定义 Jaeger 客户端的选项。
 type JaegerOptions struct {
-	// Server is the url of the Jaeger server
+	// Server 是 Jaeger 服务器的 URL
 	Server      string `json:"server,omitempty" mapstructure:"server"`
 	ServiceName string `json:"service-name,omitempty" mapstructure:"service-name"`
 	Env         string `json:"env,omitempty" mapstructure:"env"`
 }
 
-// NewJaegerOptions create a `zero` value instance.
+// NewJaegerOptions 创建一个`零值`实例。
 func NewJaegerOptions() *JaegerOptions {
 	return &JaegerOptions{
 		Server: "http://127.0.0.1:14268/api/traces",
@@ -30,14 +30,14 @@ func NewJaegerOptions() *JaegerOptions {
 	}
 }
 
-// Validate verifies flags passed to JaegerOptions.
+// Validate 验证传递给 JaegerOptions 的标志。
 func (o *JaegerOptions) Validate() []error {
 	errs := []error{}
 
 	return errs
 }
 
-// AddFlags adds flags related to mysql storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 mysql 存储相关的标志添加到指定的 FlagSet。
 func (o *JaegerOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Server, fullPrefix+".server", o.Server, ""+
 		"Server is the url of the Jaeger server.")
@@ -47,7 +47,7 @@ func (o *JaegerOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 }
 
 func (o *JaegerOptions) SetTracerProvider() error {
-	// Create the Jaeger exporter
+	// 创建 Jaeger 导出器
 	opts := make([]otlptracegrpc.Option, 0)
 	opts = append(opts, otlptracegrpc.WithEndpoint(o.Server), otlptracegrpc.WithInsecure())
 	exporter, err := otlptracegrpc.New(context.Background(), opts...)
@@ -64,14 +64,14 @@ func (o *JaegerOptions) SetTracerProvider() error {
 		return err
 	}
 
-	// batch span processor to aggregate spans before export.
+	// 批处理 span processor 在导出之前聚合 span。
 	bsp := tracesdk.NewBatchSpanProcessor(exporter)
 	tp := tracesdk.NewTracerProvider(
-		// Set the sampling rate based on the parent span to 100%
+		// 基于父 span 将采样率设置为 100%
 		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(1.0))),
-		// Always be sure to batch in production.
+		// 在生产环境中始终确保批处理。
 		tracesdk.WithSpanProcessor(bsp),
-		// Record information about this application in an Resource.
+		// 在资源中记录有关此应用程序的信息。
 		tracesdk.WithResource(res),
 	)
 

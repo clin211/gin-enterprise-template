@@ -1,34 +1,34 @@
 package known
 
-// Define HTTP/gRPC headers.
-// gRPC uses HTTP/2 as its underlying transport protocol, and the HTTP/2 specification
-// requires header keys to be in lowercase. Therefore, in gRPC, all header keys are
-// forcibly converted to lowercase to conform to HTTP/2 requirements.
-// In HTTP/1.x, many implementations preserve the case format set by the user,
-// but some HTTP frameworks or tool libraries (such as certain web servers or proxies)
-// may automatically convert headers to lowercase to simplify processing logic.
-// For compatibility, all headers are uniformly set to lowercase here.
-// Additionally, header keys prefixed with "x-" indicate they are custom headers.
+// 定义 HTTP/gRPC 头。
+// gRPC 使用 HTTP/2 作为其底层传输协议，而 HTTP/2 规范
+// 要求头键必须为小写。因此，在 gRPC 中，所有头键都
+// 被强制转换为小写以符合 HTTP/2 的要求。
+// 在 HTTP/1.x 中，许多实现保留了用户设置的大小写格式，
+// 但某些 HTTP 框架或工具库（例如某些 Web 服务器或代理）
+// 可能会自动将头转换为小写以简化处理逻辑。
+// 为了兼容性，这里将所有头统一设置为小写。
+// 此外，以 "x-" 为前缀的头键表示它们是自定义头。
 const (
-	// XRequestID defines the context key that represents the request ID.
+	// XRequestID 定义表示请求 ID 的 context 键。
 	XRequestID = "x-request-id"
 
-	// XUserID defines the context key that represents the ID of the requesting user.
-	// UserID is unique throughout the user's entire lifecycle.
+	// XUserID 定义表示请求用户 ID 的 context 键。
+	// UserID 在用户的整个生命周期中是唯一的。
 	XUserID = "x-user-id"
 
-	// XUsername defines the context key that represents the requesting username.
+	// XUsername 定义表示请求用户名的 context 键。
 	XUsername = "x-username"
 )
 
-// Define other constants.
+// 定义其他常量。
 const (
-	// AdminUsername represents the username of the admin user.
+	// AdminUsername 表示管理员用户的用户名。
 	AdminUsername = "root"
 
-	// MaxErrGroupConcurrency defines the maximum number of concurrent tasks for errgroup.
-	// It is used to limit the number of simultaneous Goroutines executing within an errgroup,
-	// preventing resource exhaustion and enhancing program stability.
-	// This value can be adjusted based on the specific scenario and needs.
+	// MaxErrGroupConcurrency 定义 errgroup 的最大并发任务数。
+	// 它用于限制在 errgroup 中同时执行的 Goroutine 数量，
+	// 防止资源耗尽并增强程序稳定性。
+	// 此值可以根据具体场景和需求进行调整。
 	MaxErrGroupConcurrency = 1000
 )

@@ -1,3 +1,3 @@
 package errcheck
 
-// File intentionally empty.
+// 文件故意留空。

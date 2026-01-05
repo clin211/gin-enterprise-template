@@ -4,70 +4,70 @@ import (
 	"context"
 )
 
-// Define keys for the context.
+// 定义 context 的键。
 type (
-	// usernameKey defines the context key for the username.
+	// usernameKey 定义用户名的 context 键。
 	usernameKey struct{}
-	// userIDKey defines the context key for the user ID.
+	// userIDKey 定义用户 ID 的 context 键。
 	userIDKey struct{}
-	// accessTokenKey defines the context key for the access token.
+	// accessTokenKey 定义访问令牌的 context 键。
 	accessTokenKey struct{}
-	// requestIDKey defines the context key for the request ID.
+	// requestIDKey 定义请求 ID 的 context 键。
 	requestIDKey struct{}
-	// traceIDKey is the key for storing trace ID in context
+	// traceIDKey 是用于在 context 中存储追踪 ID 的键
 	traceIDKey struct{}
 )
 
-// WithUserID stores the user ID into the context.
+// WithUserID 将用户 ID 存储到 context 中。
 func WithUserID(ctx context.Context, userID string) context.Context {
 	return context.WithValue(ctx, userIDKey{}, userID)
 }
 
-// UserID retrieves the user ID from the context.
+// UserID 从 context 中检索用户 ID。
 func UserID(ctx context.Context) string {
 	userID, _ := ctx.Value(userIDKey{}).(string)
 	return userID
 }
 
-// WithUsername stores the username into the context.
+// WithUsername 将用户名存储到 context 中。
 func WithUsername(ctx context.Context, username string) context.Context {
 	return context.WithValue(ctx, usernameKey{}, username)
 }
 
-// Username retrieves the username from the context.
+// Username 从 context 中检索用户名。
 func Username(ctx context.Context) string {
 	username, _ := ctx.Value(usernameKey{}).(string)
 	return username
 }
 
-// WithAccessToken stores the access token into the context.
+// WithAccessToken 将访问令牌存储到 context 中。
 func WithAccessToken(ctx context.Context, accessToken string) context.Context {
 	return context.WithValue(ctx, accessTokenKey{}, accessToken)
 }
 
-// AccessToken retrieves the access token from the context.
+// AccessToken 从 context 中检索访问令牌。
 func AccessToken(ctx context.Context) string {
 	accessToken, _ := ctx.Value(accessTokenKey{}).(string)
 	return accessToken
 }
 
-// WithRequestID stores the request ID into the context.
+// WithRequestID 将请求 ID 存储到 context 中。
 func WithRequestID(ctx context.Context, requestID string) context.Context {
 	return context.WithValue(ctx, requestIDKey{}, requestID)
 }
 
-// RequestID retrieves the request ID from the context.
+// RequestID 从 context 中检索请求 ID。
 func RequestID(ctx context.Context) string {
 	requestID, _ := ctx.Value(requestIDKey{}).(string)
 	return requestID
 }
 
-// WithTraceID stores the trace ID into the context.
+// WithTraceID 将追踪 ID 存储到 context 中。
 func WithTraceID(ctx context.Context, traceID string) context.Context {
 	return context.WithValue(ctx, traceIDKey{}, traceID)
 }
 
-// TraceID retrieves the trace ID from the context.
+// TraceID 从 context 中检索追踪 ID。
 func TraceID(ctx context.Context) string {
 	traceID, _ := ctx.Value(traceIDKey{}).(string)
 	return traceID

@@ -20,8 +20,8 @@ import (
 	"github.com/clin211/gin-enterprise-template/pkg/version"
 )
 
-// App is the main structure of a cli application.
-// It is recommended that an app be created with the app.NewApp() function.
+// App 是 CLI 应用程序的主结构。
+// 建议使用 app.NewApp() 函数创建应用。
 type App struct {
 	name        string
 	shortDesc   string
@@ -42,54 +42,54 @@ type App struct {
 	// +optional
 	noConfig bool
 
-	// watching and re-reading config files
+	// 监视和重新读取配置文件
 	// +optional
 	watch bool
 
 	contextExtractors map[string]func(context.Context) string
 }
 
-// RunFunc defines the application's startup callback function.
+// RunFunc 定义应用程序的启动回调函数。
 type RunFunc func() error
 
-// HealthCheckFunc defines the health check function for the application.
+// HealthCheckFunc 定义应用程序的健康检查函数。
 type HealthCheckFunc func() error
 
-// Option defines optional parameters for initializing the application
-// structure.
+// Option 定义用于初始化应用程序
+// 结构的可选参数。
 type Option func(*App)
 
-// WithOptions to open the application's function to read from the command line
-// or read parameters from the configuration file.
+// WithOptions 用于打开应用程序从命令行读取
+// 或从配置文件读取参数的功能。
 func WithOptions(opts any) Option {
 	return func(app *App) {
 		app.options = opts
 	}
 }
 
-// WithRunFunc is used to set the application startup callback function option.
+// WithRunFunc 用于设置应用程序启动回调函数选项。
 func WithRunFunc(run RunFunc) Option {
 	return func(app *App) {
 		app.run = run
 	}
 }
 
-// WithDescription is used to set the description of the application.
+// WithDescription 用于设置应用程序的描述。
 func WithDescription(desc string) Option {
 	return func(app *App) {
 		app.description = desc
 	}
 }
 
-// WithHealthCheckFunc is used to set the health check function for the application.
-// The app framework will use the function to start a health check server.
+// WithHealthCheckFunc 用于为应用程序设置健康检查函数。
+// 应用程序框架将使用该函数启动健康检查服务器。
 func WithHealthCheckFunc(fn HealthCheckFunc) Option {
 	return func(app *App) {
 		app.healthCheckFunc = fn
 	}
 }
 
-// WithDefaultHealthCheckFunc set the default health check function.
+// WithDefaultHealthCheckFunc 设置默认健康检查函数。
 func WithDefaultHealthCheckFunc() Option {
 	fn := func() HealthCheckFunc {
 		return func() error {
@@ -102,37 +102,37 @@ func WithDefaultHealthCheckFunc() Option {
 	return WithHealthCheckFunc(fn())
 }
 
-// WithSilence sets the application to silent mode, in which the program startup
-// information, configuration information, and version information are not
-// printed in the console.
+// WithSilence 将应用程序设置为静默模式，在该模式下，程序启动
+// 信息、配置信息和版本信息不会
+// 打印在控制台中。
 func WithSilence() Option {
 	return func(app *App) {
 		app.silence = true
 	}
 }
 
-// WithNoConfig set the application does not provide config flag.
+// WithNoConfig 设置应用程序不提供配置标志。
 func WithNoConfig() Option {
 	return func(app *App) {
 		app.noConfig = true
 	}
 }
 
-// WithValidArgs set the validation function to valid non-flag arguments.
+// WithValidArgs 设置验证函数以验证非标志参数。
 func WithValidArgs(args cobra.PositionalArgs) Option {
 	return func(app *App) {
 		app.args = args
 	}
 }
 
-// WithDefaultValidArgs set default validation function to valid non-flag arguments.
+// WithDefaultValidArgs 设置默认验证函数以验证非标志参数。
 func WithDefaultValidArgs() Option {
 	return func(app *App) {
 		app.args = cobra.NoArgs
 	}
 }
 
-// WithWatchConfig watching and re-reading config files.
+// WithWatchConfig 监视并重新读取配置文件。
 func WithWatchConfig() Option {
 	return func(app *App) {
 		app.watch = true
@@ -145,8 +145,8 @@ func WithLoggerContextExtractor(contextExtractors map[string]func(context.Contex
 	}
 }
 
-// NewApp creates a new application instance based on the given application name,
-// binary name, and other options.
+// NewApp 根据给定的应用程序名称、
+// 二进制名称和其他选项创建新的应用程序实例。
 func NewApp(name string, shortDesc string, opts ...Option) *App {
 	app := &App{
 		name:      name,
@@ -163,7 +163,7 @@ func NewApp(name string, shortDesc string, opts ...Option) *App {
 	return app
 }
 
-// buildCommand is used to build a cobra command.
+// buildCommand 用于构建 cobra 命令。
 func (app *App) buildCommand() {
 	cmd := &cobra.Command{
 		Use:   formatBaseName(app.name),
@@ -175,28 +175,28 @@ func (app *App) buildCommand() {
 		},
 		Args: app.args,
 	}
-	// When error printing is enabled for the Cobra command, a flag parse
-	// error gets printed first, then optionally the often long usage
-	// text. This is very unreadable in a console because the last few
-	// lines that will be visible on screen don't include the error.
+	// 当为 Cobra 命令启用错误打印时，标志解析
+	// 错误首先被打印，然后可选地打印通常很长的用法
+	// 文本。这在控制台中非常不可读，因为屏幕上可见的
+	// 最后几行不包含错误。
 	//
-	// The recommendation from #sig-cli was to print the usage text, then
-	// the error. We implement this consistently for all commands here.
-	// However, we don't want to print the usage text when command
-	// execution fails for other reasons than parsing. We detect this via
-	// the FlagParseError callback.
+	// #sig-cli 的建议是打印用法文本，然后
+	// 打印错误。我们在这里为所有命令一致地实现这一点。
+	// 但是，我们不想在命令因解析以外的原因
+	// 执行失败时打印用法文本。我们通过
+	// FlagParseError 回调来检测这一点。
 	//
-	// Some commands, like kubectl, already deal with this themselves.
-	// We don't change the behavior for those.
+	// 某些命令（如 kubectl）已经自己处理了这个问题。
+	// 我们不更改这些命令的行为。
 	if !cmd.SilenceUsage {
 		cmd.SilenceUsage = true
 		cmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
-			// Re-enable usage printing.
+			// 重新启用用法打印。
 			c.SilenceUsage = false
 			return err
 		})
 	}
-	// In all cases error printing is done below.
+	// 在所有情况下，错误打印都在下面完成。
 	cmd.SilenceErrors = true
 
 	cmd.SetOutput(os.Stdout)
@@ -237,13 +237,13 @@ func (app *App) buildCommand() {
 	app.cmd = cmd
 }
 
-// Run is used to launch the application.
+// Run 用于启动应用程序。
 func (app *App) Run() {
 	os.Exit(cli.Run(app.cmd))
 }
 
 func (app *App) runCommand(cmd *cobra.Command, args []string) error {
-	// display application version information
+	// 显示应用程序版本信息
 	version.PrintAndExitIfRequested()
 
 	if err := viper.BindPFlags(cmd.Flags()); err != nil {
@@ -291,19 +291,19 @@ func (app *App) runCommand(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// run application
+	// 运行应用程序
 	return app.run()
 }
 
-// Command returns cobra command instance inside the application.
+// Command 返回应用程序内的 cobra 命令实例。
 func (app *App) Command() *cobra.Command {
 	return app.cmd
 }
 
-// formatBaseName is formatted as an executable file name under different
-// operating systems according to the given name.
+// formatBaseName 根据给定的名称将
+// 其格式化为不同操作系统下的可执行文件名。
 func formatBaseName(name string) string {
-	// Make case-insensitive and strip executable suffix if present
+	// 不区分大小写并删除可执行文件后缀（如果存在）
 	if runtime.GOOS == "windows" {
 		name = strings.ToLower(name)
 		name = strings.TrimSuffix(name, ".exe")
@@ -311,11 +311,11 @@ func formatBaseName(name string) string {
 	return name
 }
 
-// initializeLogger sets up the logging system based on the configuration.
+// initializeLogger 根据配置设置日志系统。
 func (app *App) initializeLogger() {
 	logOptions := log.NewOptions()
 
-	// Configure logging options from viper
+	// 从 viper 配置日志选项
 	if viper.IsSet("log.disable-caller") {
 		logOptions.DisableCaller = viper.GetBool("log.disable-caller")
 	}
@@ -332,6 +332,6 @@ func (app *App) initializeLogger() {
 		logOptions.OutputPaths = viper.GetStringSlice("log.output-paths")
 	}
 
-	// Initialize logging with custom context extractors
+	// 使用自定义上下文提取器初始化日志
 	log.Init(logOptions, log.WithContextExtractor(app.contextExtractors))
 }

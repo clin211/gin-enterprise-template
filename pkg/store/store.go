@@ -10,29 +10,29 @@ import (
 	"github.com/clin211/gin-enterprise-template/pkg/store/where"
 )
 
-// DBProvider defines an interface for providing a database connection.
+// DBProvider 定义了一个提供数据库连接的接口。
 type DBProvider interface {
-	// DB returns the database instance for the given context.
+	// DB 返回给定上下文的数据库实例。
 	DB(ctx context.Context, wheres ...where.Where) *gorm.DB
 }
 
-// Option defines a function type for configuring the Store.
+// Option 定义用于配置 Store 的函数类型。
 type Option[T any] func(*Store[T])
 
-// Store represents a generic data store with logging capabilities.
+// Store 表示一个具有日志记录功能的通用数据存储。
 type Store[T any] struct {
 	logger  Logger
 	storage DBProvider
 }
 
-// WithLogger returns an Option function that sets the provided Logger to the Store for logging purposes.
+// WithLogger 返回一个 Option 函数，将提供的 Logger 设置到 Store 以用于日志记录。
 func WithLogger[T any](logger Logger) Option[T] {
 	return func(s *Store[T]) {
 		s.logger = logger
 	}
 }
 
-// NewStore creates a new instance of Store with the provided DBProvider.
+// NewStore 使用提供的 DBProvider 创建 Store 的新实例。
 func NewStore[T any](storage DBProvider, logger Logger) *Store[T] {
 	if logger == nil {
 		logger = empty.NewLogger()
@@ -44,7 +44,7 @@ func NewStore[T any](storage DBProvider, logger Logger) *Store[T] {
 	}
 }
 
-// db retrieves the database instance and applies the provided where conditions.
+// db 获取数据库实例并应用的提供的 where 条件。
 func (s *Store[T]) db(ctx context.Context, wheres ...where.Where) *gorm.DB {
 	dbInstance := s.storage.DB(ctx)
 	for _, whr := range wheres {
@@ -55,7 +55,7 @@ func (s *Store[T]) db(ctx context.Context, wheres ...where.Where) *gorm.DB {
 	return dbInstance
 }
 
-// Create inserts a new object into the database.
+// Create 向数据库中插入一个新对象。
 func (s *Store[T]) Create(ctx context.Context, obj *T) error {
 	if err := s.db(ctx).Create(obj).Error; err != nil {
 		s.logger.Error(ctx, err, "Failed to insert object into database", "object", obj)
@@ -64,7 +64,7 @@ func (s *Store[T]) Create(ctx context.Context, obj *T) error {
 	return nil
 }
 
-// Update modifies an existing object in the database.
+// Update 修改数据库中的现有对象。
 func (s *Store[T]) Update(ctx context.Context, obj *T) error {
 	if err := s.db(ctx).Save(obj).Error; err != nil {
 		s.logger.Error(ctx, err, "Failed to update object in database", "object", obj)
@@ -73,7 +73,7 @@ func (s *Store[T]) Update(ctx context.Context, obj *T) error {
 	return nil
 }
 
-// Delete removes an object from the database based on the provided where options.
+// Delete 根据提供的 where 选项从数据库中删除对象。
 func (s *Store[T]) Delete(ctx context.Context, opts *where.Options) error {
 	err := s.db(ctx, opts).Delete(new(T)).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -83,7 +83,7 @@ func (s *Store[T]) Delete(ctx context.Context, opts *where.Options) error {
 	return nil
 }
 
-// Get retrieves a single object from the database based on the provided where options.
+// Get 根据提供的 where 选项从数据库中检索单个对象。
 func (s *Store[T]) Get(ctx context.Context, opts *where.Options) (*T, error) {
 	var obj T
 	if err := s.db(ctx, opts).First(&obj).Error; err != nil {
@@ -93,7 +93,7 @@ func (s *Store[T]) Get(ctx context.Context, opts *where.Options) (*T, error) {
 	return &obj, nil
 }
 
-// List retrieves a list of objects from the database based on the provided where options.
+// List 根据提供的 where 选项从数据库中检索对象列表。
 func (s *Store[T]) List(ctx context.Context, opts *where.Options) (count int64, ret []*T, err error) {
 	err = s.db(ctx, opts).Order("id desc").Find(&ret).Offset(-1).Limit(-1).Count(&count).Error
 	if err != nil {

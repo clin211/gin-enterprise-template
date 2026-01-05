@@ -13,7 +13,7 @@ import (
 	mw "github.com/clin211/gin-enterprise-template/internal/pkg/middleware/gin"
 )
 
-// NewServer sets up and create the web server with all necessary dependencies.
+// NewServer 设置并创建包含所有必要依赖的 Web 服务器。
 func NewServer(*Config) (*Server, error) {
 	wire.Build(
 		NewWebServer,

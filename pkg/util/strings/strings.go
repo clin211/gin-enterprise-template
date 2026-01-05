@@ -27,7 +27,7 @@ func (fi frequencyInfoSlice) Less(i, j int) bool {
 	return fi[j].frequency > fi[i].frequency
 }
 
-// Creates an slice of slice values not included in the other given slice.
+// 创建一个不包含在另一个给定切片中的切片值。
 func Diff(base, exclude []string) (result []string) {
 	excludeMap := make(map[string]bool)
 	for _, s := range exclude {
@@ -42,7 +42,7 @@ func Diff(base, exclude []string) (result []string) {
 	return result
 }
 
-// Creates an slice of slice values included in the other given slice.
+// 创建一个包含在另一个给定切片中的切片值。
 func Include(base, include []string) (result []string) {
 	baseMap := make(map[string]bool)
 	for _, s := range base {
@@ -103,7 +103,7 @@ func Reverse(s string) string {
 	return string(buf)
 }
 
-// Filter filters a list for a string.
+// Filter 从列表中过滤指定的字符串。
 func Filter(list []string, strToFilter string) (newList []string) {
 	for _, item := range list {
 		if item != strToFilter {
@@ -123,7 +123,7 @@ func Add(list []string, str string) []string {
 	return append(list, str)
 }
 
-// Contains returns true if a list contains a string.
+// Contains 如果列表包含指定字符串则返回 true。
 func Contains(list []string, strToSearch string) bool {
 	for _, item := range list {
 		if item == strToSearch {
@@ -159,7 +159,7 @@ func FrequencySort(list []string) []string {
 	return ret
 }
 
-// ContainsEqualFold returns true if a given slice 'slice' contains string 's' under unicode case-folding.
+// ContainsEqualFold 如果给定切片 'slice' 在 unicode 不区分大小写的情况下包含字符串 's'，则返回 true。
 func ContainsEqualFold(slice []string, s string) bool {
 	for _, item := range slice {
 		if strings.EqualFold(item, s) {

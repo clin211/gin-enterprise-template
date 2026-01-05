@@ -7,13 +7,13 @@ import (
 )
 
 func ExampleResourceID_String() {
-	// Define a resource identifier, for example, a user resource.
+	// 定义一个资源标识符，例如，用户资源。
 	userID := rid.UserID
 
-	// Call the String method to convert the ResourceID type to a string type.
+	// 调用 String 方法将 ResourceID 类型转换为 string 类型。
 	idString := userID.String()
 
-	// Output the result.
+	// 输出结果。
 	fmt.Println(idString)
 
 	// Output:

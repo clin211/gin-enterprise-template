@@ -13,15 +13,15 @@ const (
 	startTime          = "_start_time"
 )
 
-// TracePlugin defines gorm plugin used to trace sql.
+// TracePlugin 定义用于追踪 SQL 的 gorm 插件.
 type TracePlugin struct{}
 
-// Name returns the name of trace plugin.
+// Name 返回追踪插件的名称.
 func (op *TracePlugin) Name() string {
 	return "tracePlugin"
 }
 
-// Initialize initialize the trace plugin.
+// Initialize 初始化追踪插件.
 func (op *TracePlugin) Initialize(db *gorm.DB) (err error) {
 	// 开始前
 	_ = db.Callback().Create().Before("gorm:before_create").Register(callBackBeforeName, before)

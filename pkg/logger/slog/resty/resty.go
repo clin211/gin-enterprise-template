@@ -5,12 +5,12 @@ import (
 	"log/slog"
 )
 
-// Logger is a Breeze logger implementation using log/slog.
+// Logger 是一个使用 log/slog 实现的 Breeze 日志记录器。
 type Logger struct {
 	logger *slog.Logger
 }
 
-// NewLogger creates a new logger using the default slog instance.
+// NewLogger 使用默认的 slog 实例创建一个新的日志记录器。
 func NewLogger() *Logger {
 	return &Logger{logger: slog.Default()}
 }

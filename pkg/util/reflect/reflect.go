@@ -101,7 +101,7 @@ func CopyObj(from any, to any, fields []string) (changed bool, err error) {
 	return true, nil
 }
 
-// CopyObjViaYaml marshal "from" to yaml data, then unMarshal data to "to".
+// CopyObjViaYaml 将 "from" 序列化为 yaml 数据，然后将数据反序列化到 "to"。
 func CopyObjViaYaml(to any, from any) error {
 	if from == nil || to == nil {
 		return nil
@@ -114,7 +114,7 @@ func CopyObjViaYaml(to any, from any) error {
 	return yaml.Unmarshal(data, to)
 }
 
-// StructName used to get the struct name from the obj.
+// StructName 用于从对象获取结构体名称。
 func StructName(obj any) string {
 	t := reflect.TypeOf(obj)
 	if t.Kind() == reflect.Ptr {
@@ -124,7 +124,7 @@ func StructName(obj any) string {
 	return t.Name()
 }
 
-// findString return true if target in slice, return false if not.
+// findString 如果目标在切片中返回 true，否则返回 false。
 func findString(slice []string, target string) bool {
 	for _, str := range slice {
 		if str == target {

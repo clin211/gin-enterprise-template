@@ -49,7 +49,7 @@ func WithCodeSalt(salt uint64) func(*CodeOptions) {
 func getCodeOptionsOrSetDefault(options *CodeOptions) *CodeOptions {
 	if options == nil {
 		return &CodeOptions{
-			// base string set, remove 0,1,I,O,U,Z
+			// 基础字符集，移除了 0,1,I,O,U,Z
 			chars: []rune{
 				'2', '3', '4', '5', '6',
 				'7', '8', '9', 'A', 'B',
@@ -58,13 +58,13 @@ func getCodeOptionsOrSetDefault(options *CodeOptions) *CodeOptions {
 				'N', 'P', 'Q', 'R', 'S',
 				'T', 'V', 'W', 'X', 'Y',
 			},
-			// n1 / len(chars)=30 cop rime
+			// n1 / len(chars)=30 互质
 			n1: 17,
-			// n2 / l cop rime
+			// n2 / l 互质
 			n2: 5,
-			// code length
+			// 编码长度
 			l: 8,
-			// random number
+			// 随机数
 			salt: 123567369,
 		}
 	}

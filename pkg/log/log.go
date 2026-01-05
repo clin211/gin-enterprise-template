@@ -98,7 +98,7 @@ func NewLogger(opts *Options, options ...Option) *zapLogger {
 	encoderConfig.EncodeDuration = func(d time.Duration, enc zapcore.PrimitiveArrayEncoder) {
 		enc.AppendFloat64(float64(d) / float64(time.Millisecond))
 	}
-	// when output to local path, with color is forbidden
+	// 当输出到本地路径时，禁止使用颜色
 	if opts.Format == "console" && opts.EnableColor {
 		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
@@ -186,10 +186,9 @@ func AddCallerSkip(skip int) Logger {
 	return std.AddCallerSkip(skip)
 }
 
-// AddCallerSkip increases the number of callers skipped by caller annotation
-// (as enabled by the AddCaller option). When building wrappers around the
-// Logger and SugaredLogger, supplying this Option prevents zap from always
-// reporting the wrapper code as the caller.
+// AddCallerSkip 增加调用者注解跳过的调用者数量
+// （由 AddCaller 选项启用）。在构建 Logger 和 SugaredLogger 的包装器时，
+// 提供此选项可以防止 zap 总是将包装器代码报告为调用者。
 func (l *zapLogger) AddCallerSkip(skip int) Logger {
 	lc := l.clone()
 	lc.z = lc.z.WithOptions(zap.AddCallerSkip(skip))

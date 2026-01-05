@@ -7,7 +7,7 @@ import (
 	"github.com/clin211/gin-enterprise-template/internal/apiserver/pkg/validation"
 )
 
-// Handler implements a gRPC service.
+// Handler 实现 gRPC 服务。
 type Handler struct {
 	biz biz.IBiz
 	val *validation.Validator
@@ -18,7 +18,7 @@ type Registrar func(v1 *gin.RouterGroup, h *Handler)
 
 var registrars []Registrar
 
-// NewHandler creates a new instance of Handler.
+// NewHandler 创建 Handler 的新实例。
 func NewHandler(biz biz.IBiz, val *validation.Validator, mws ...gin.HandlerFunc) *Handler {
 	return &Handler{biz: biz, val: val, mws: mws}
 }

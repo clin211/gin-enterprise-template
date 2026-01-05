@@ -5,32 +5,32 @@ import (
 	"log/slog"
 )
 
-// Logger is a Breeze logger implementation using log/slog.
+// Logger 是一个使用 log/slog 实现的 Breeze 日志记录器。
 type Logger struct {
 	logger *slog.Logger
 }
 
-// NewLogger creates a new logger using the default slog instance.
+// NewLogger 使用默认的 slog 实例创建一个新的日志记录器。
 func NewLogger() *Logger {
 	return &Logger{logger: slog.Default()}
 }
 
-// Debug outputs debug information.
+// Debug 输出调试信息。
 func (l *Logger) Debug(ctx context.Context, msg string, args ...any) {
 	l.logger.DebugContext(ctx, msg, args...)
 }
 
-// Info outputs general information.
+// Info 输出一般信息。
 func (l *Logger) Info(ctx context.Context, msg string, args ...any) {
 	l.logger.InfoContext(ctx, msg, args...)
 }
 
-// Warn outputs warning information.
+// Warn 输出警告信息。
 func (l *Logger) Warn(ctx context.Context, msg string, args ...any) {
 	l.logger.WarnContext(ctx, msg, args...)
 }
 
-// Error outputs error information.
+// Error 输出错误信息。
 func (l *Logger) Error(ctx context.Context, msg string, args ...any) {
 	l.logger.ErrorContext(ctx, msg, args...)
 }

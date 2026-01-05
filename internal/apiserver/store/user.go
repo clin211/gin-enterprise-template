@@ -26,15 +26,15 @@ type UserStore interface {
 // nolint: iface
 type UserExpansion interface{}
 
-// userStore 是 UserStore 接口的实现.
+// userStore 是 UserStore 接口的实现。
 type userStore struct {
 	*genericstore.Store[model.UserM]
 }
 
-// 确保 userStore 实现了 UserStore 接口.
+// 确保 userStore 实现了 UserStore 接口。
 var _ UserStore = (*userStore)(nil)
 
-// newUserStore 创建 userStore 的实例.
+// newUserStore 创建 userStore 的实例。
 func newUserStore(store *datastore) *userStore {
 	return &userStore{
 		Store: genericstore.NewStore[model.UserM](store, storelogger.NewLogger()),

@@ -16,44 +16,44 @@ import (
 )
 
 const (
-	// defaultHomeDir defines the default directory to store the configuration for the gin-enterprise-template-apiserver service.
+	// defaultHomeDir 定义存储 gin-enterprise-template-apiserver 服务配置的默认目录。
 	defaultHomeDir = ".gin-enterprise-template"
 
-	// defaultConfigName specifies the default configuration file name for the gin-enterprise-template-apiserver service.
+	// defaultConfigName 指定 gin-enterprise-template-apiserver 服务的默认配置文件名。
 	defaultConfigName = "gin-enterprise-template-apiserver.yaml"
 )
 
-// Path to the configuration file
+// 配置文件的路径
 var configFile string
 
-// NewWebServerCommand creates a *cobra.Command object used to start the application.
+// NewWebServerCommand 创建用于启动应用程序的 *cobra.Command 对象。
 func NewWebServerCommand() *cobra.Command {
-	// Create default application command-line options
+	// 创建默认的应用程序命令行选项
 	opts := options.NewServerOptions()
 
 	cmd := &cobra.Command{
-		// Specify the name of the command, which will appear in the help information
+		// 指定命令名称，将出现在帮助信息中
 		Use: "gin-enterprise-template-apiserver",
-		// A short description of the command
+		// 命令的简短描述
 		Short: "Please update the short description of the binary file.",
-		// A detailed description of the command
+		// 命令的详细描述
 		Long: `Please update the detailed description of the binary file.`,
-		// Do not print help information when the command encounters an error.
-		// Setting this to true ensures that errors are immediately visible.
+		// 当命令遇到错误时不打印帮助信息。
+		// 将此设置为 true 可确保错误立即可见。
 		SilenceUsage: true,
-		// Specify the Run function to execute when cmd.Execute() is called
+		// 指定调用 cmd.Execute() 时要执行的 Run 函数
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := genericapiserver.SetupSignalContext()
 
-			// If the --version flag is passed, print version information and exit
+			// 如果传递了 --version 标志，则打印版本信息并退出
 			version.PrintAndExitIfRequested()
 
-			// Unmarshal the configuration from viper into opts
+			// 将 viper 的配置反序列化到 opts
 			if err := viper.Unmarshal(opts); err != nil {
 				return fmt.Errorf("failed to unmarshal configuration: %w", err)
 			}
 
-			// Validate command-line options
+			// 验证命令行选项
 			if err := opts.Validate(); err != nil {
 				return fmt.Errorf("invalid options: %w", err)
 			}
@@ -66,59 +66,59 @@ func NewWebServerCommand() *cobra.Command {
 
 			return run(ctx, opts)
 		},
-		// Set argument validation for the command. No command-line arguments are required.
-		// For example: ./gin-enterprise-template-apiserver param1 param2
+		// 为命令设置参数验证。不需要命令行参数。
+		// 例如：./gin-enterprise-template-apiserver param1 param2
 		Args: cobra.NoArgs,
 	}
 
-	// Initialize configuration function, called when each command runs
+	// 初始化配置函数，在每个命令运行时调用
 	cobra.OnInitialize(core.OnInitialize(&configFile, "MINIBLOG-V4_APISERVER", searchDirs(), defaultConfigName))
 
-	// cobra supports persistent flags, which apply to the assigned command and all its subcommands.
-	// It is recommended to use configuration files for application configuration to make it easier to manage configuration items.
+	// cobra 支持持久标志，适用于指定命令及其所有子命令。
+	// 建议使用配置文件进行应用程序配置，以便更轻松地管理配置项。
 	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", filePath(), "Path to the gin-enterprise-template-apiserver configuration file.")
 
-	// Add server options as flags
+	// 将服务器选项添加为标志
 	opts.AddFlags(cmd.PersistentFlags())
 
-	// Add the --version flag
+	// 添加 --version 标志
 	version.AddFlags(cmd.PersistentFlags())
 
 	return cmd
 }
 
-// run contains the main logic for initializing and running the server.
+// run 包含初始化和运行服务器的主要逻辑。
 func run(ctx context.Context, opts *options.ServerOptions) error {
-	// Retrieve application configuration
-	// Separating command-line options and application configuration allows more flexible handling of these two types of configurations.
+	// 获取应用程序配置
+	// 分离命令行选项和应用程序配置可以更灵活地处理这两种类型的配置。
 	cfg, err := opts.Config()
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	// Create and start the server
+	// 创建并启动服务器
 	server, err := cfg.NewServer(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create server: %w", err)
 	}
 
-	// Run the server
+	// 运行服务器
 	return server.Run(ctx)
 }
 
-// searchDirs returns the default directories to search for the configuration file.
+// searchDirs 返回搜索配置文件的默认目录。
 func searchDirs() []string {
-	// Get the user's home directory.
+	// 获取用户的主目录。
 	homeDir, err := os.UserHomeDir()
-	// If unable to get the user's home directory, print an error message and exit the program.
+	// 如果无法获取用户的主目录，打印错误消息并退出程序。
 	cobra.CheckErr(err)
 	return []string{filepath.Join(homeDir, defaultHomeDir), "."}
 }
 
-// filePath retrieves the full path to the default configuration file.
+// filePath 检索默认配置文件的完整路径。
 func filePath() string {
 	home, err := os.UserHomeDir()
-	// If the user's home directory cannot be retrieved, log an error and return an empty path.
+	// 如果无法检索用户的主目录，记录错误并返回空路径。
 	cobra.CheckErr(err)
 	return filepath.Join(home, defaultHomeDir, defaultConfigName)
 }

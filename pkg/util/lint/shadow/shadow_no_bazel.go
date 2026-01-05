@@ -1,3 +1,3 @@
 package shadow
 
-// File intentionally empty.
+// 文件故意留空。

@@ -8,9 +8,9 @@ import (
 	netutils "k8s.io/utils/net"
 )
 
-// Define unit constant.
+// 定义单位常量。
 const (
-	_   = iota // ignore onex.iota
+	_   = iota // 忽略 onex.iota
 	KiB = 1 << (10 * iota)
 	MiB
 	GiB
@@ -26,9 +26,9 @@ func Join(prefixes ...string) string {
 	return joined
 }
 
-// ValidateAddress takes an address as a string and validates it.
-// If the input address is not in a valid :port or IP:port format, it returns an error.
-// It also checks if the host part of the address is a valid IP address and if the port number is valid.
+// ValidateAddress 接受字符串形式的地址并验证它。
+// 如果输入地址不是有效的 :port 或 IP:port 格式，则返回错误。
+// 它还检查地址的主机部分是否是有效的 IP 地址，以及端口号是否有效。
 func ValidateAddress(addr string) error {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
@@ -44,7 +44,7 @@ func ValidateAddress(addr string) error {
 	return nil
 }
 
-// CreateListener create net listener by given address and returns it and port.
+// CreateListener 根据给定地址创建网络监听器并返回它和端口。
 func CreateListener(addr string) (net.Listener, int, error) {
 	network := "tcp"
 
@@ -53,7 +53,7 @@ func CreateListener(addr string) (net.Listener, int, error) {
 		return nil, 0, fmt.Errorf("failed to listen on %v: %w", addr, err)
 	}
 
-	// get port
+	// 获取端口
 	tcpAddr, ok := ln.Addr().(*net.TCPAddr)
 	if !ok {
 		_ = ln.Close()

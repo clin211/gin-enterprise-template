@@ -14,7 +14,7 @@ type Sonyflake struct {
 	Error error
 }
 
-// NewSonyflake can get a unique code by id(You need to ensure that id is unique).
+// NewSonyflake 可以根据 id 生成唯一编码（你需要确保 id 是唯一的）。
 func NewSonyflake(options ...func(*SonyflakeOptions)) *Sonyflake {
 	ops := getSonyflakeOptionsOrSetDefault(nil)
 	for _, f := range options {
@@ -33,11 +33,11 @@ func NewSonyflake(options ...func(*SonyflakeOptions)) *Sonyflake {
 	}
 	ins := sonyflake.NewSonyflake(st)
 	if ins == nil {
-		sf.Error = fmt.Errorf("create snoyflake failed")
+		sf.Error = fmt.Errorf("创建 sonyflake 失败")
 	}
 	_, err := ins.NextID()
 	if err != nil {
-		sf.Error = fmt.Errorf("invalid start time")
+		sf.Error = fmt.Errorf("无效的起始时间")
 	}
 	sf.sf = ins
 	return sf

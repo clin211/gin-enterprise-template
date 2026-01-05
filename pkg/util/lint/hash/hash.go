@@ -8,10 +8,10 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 )
 
-// Doc documents this pass.
+// Doc 记录此检查。
 const Doc = `check for correct use of hash.Hash`
 
-// Analyzer defines this pass.
+// Analyzer 定义此检查。
 var Analyzer = &analysis.Analyzer{
 	Name:     "hash",
 	Doc:      Doc,
@@ -19,18 +19,15 @@ var Analyzer = &analysis.Analyzer{
 	Run:      run,
 }
 
-// hashChecker assures that the hash.Hash interface is not misused. A common
-// mistake is to assume that the Sum function returns the hash of its input,
-// like so:
+// hashChecker 确保 hash.Hash 接口不被误用。一个常见的错误是假设 Sum 函数返回其输入的哈希，
+// 像这样：
 //
 //	hashedBytes := sha256.New().Sum(inputBytes)
 //
-// In fact, the parameter to Sum is not the bytes to be hashed, but a slice that
-// will be used as output in case the caller wants to avoid an allocation. In
-// the example above, hashedBytes is not the SHA-256 hash of inputBytes, but
-// the concatenation of inputBytes with the hash of the empty string.
+// 实际上，Sum 的参数不是要哈希的字节，而是一个将在调用者希望避免分配时用作输出的切片。
+// 在上面的示例中，hashedBytes 不是 inputBytes 的 SHA-256 哈希，而是 inputBytes 与空字符串的哈希的连接。
 //
-// Correct uses of the hash.Hash interface are as follows:
+// hash.Hash 接口的正确用法如下：
 //
 //	h := sha256.New()
 //	h.Write(inputBytes)
@@ -41,11 +38,10 @@ var Analyzer = &analysis.Analyzer{
 //	var hashedBytes [sha256.Size]byte
 //	h.Sum(hashedBytes[:0])
 //
-// To differentiate between correct and incorrect usages, hashChecker applies a
-// simple heuristic: it flags calls to Sum where a) the parameter is non-nil and
-// b) the return value is used.
+// 为了区分正确和错误的用法，hashChecker 应用一个简单的启发式方法：它标记 a) 参数非 nil 且
+// b) 使用返回值的 Sum 调用。
 //
-// The hash.Hash interface may be remedied in Go 2. See golang/go#21070.
+// hash.Hash 接口可能会在 Go 2 中得到修复。参见 golang/go#21070。
 func run(pass *analysis.Pass) (any, error) {
 	selectorIsHash := func(s *ast.SelectorExpr) bool {
 		tv, ok := pass.TypesInfo.Types[s.X]
@@ -68,9 +64,9 @@ func run(pass *analysis.Pass) (any, error) {
 			stack = stack[:len(stack)-1] // pop
 			return true
 		}
-		stack = append(stack, n) // push
+		stack = append(stack, n) // 压入栈
 
-		// Find a call to hash.Hash.Sum.
+		// 查找对 hash.Hash.Sum 的调用。
 		selExpr, ok := n.(*ast.SelectorExpr)
 		if !ok {
 			return true
@@ -88,15 +84,15 @@ func run(pass *analysis.Pass) (any, error) {
 		if len(callExpr.Args) != 1 {
 			return true
 		}
-		// We have a valid call to hash.Hash.Sum.
+		// 我们有一个对 hash.Hash.Sum 的有效调用。
 
-		// Is the argument nil?
+		// 参数是否为 nil？
 		var nilArg bool
 		if id, ok := callExpr.Args[0].(*ast.Ident); ok && id.Name == "nil" {
 			nilArg = true
 		}
 
-		// Is the return value unused?
+		// 返回值是否未使用？
 		var retUnused bool
 	Switch:
 		switch t := stack[len(stack)-3].(type) {
@@ -104,8 +100,7 @@ func run(pass *analysis.Pass) (any, error) {
 			for i := range t.Rhs {
 				if t.Rhs[i] == stack[len(stack)-2] {
 					if id, ok := t.Lhs[i].(*ast.Ident); ok && id.Name == "_" {
-						// Assigning to the blank identifier does not count as using the
-						// return value.
+						// 赋值给空白标识符不算作使用返回值。
 						retUnused = true
 					}
 					break Switch
@@ -120,7 +115,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 		if !nilArg && !retUnused {
 			pass.Reportf(callExpr.Pos(), "probable misuse of hash.Hash.Sum: "+
-				"provide parameter or use return value, but not both")
+				"提供参数或使用返回值，但不能同时使用两者")
 		}
 		return true
 	})

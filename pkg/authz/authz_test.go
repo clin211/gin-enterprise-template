@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// setupTestDB 创建测试用的 MySQL 数据库
+// setupTestDB 创建测试用的 MySQL 数据库。
 func setupTestDB(t *testing.T) *gorm.DB {
 	dsn := "root:@tcp(127.0.0.1:3306)/gin_enterprise_template?charset=utf8&parseTime=true&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -21,7 +21,7 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	return db
 }
 
-// TestNewAuthz 测试创建授权器
+// TestNewAuthz 测试创建授权器。
 func TestNewAuthz(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -68,7 +68,7 @@ func TestNewAuthz(t *testing.T) {
 	}
 }
 
-// TestAuthz_Authorize 测试授权功能
+// TestAuthz_Authorize 测试授权功能。
 func TestAuthz_Authorize(t *testing.T) {
 	db := setupTestDB(t)
 	authz, err := NewAuthz(db)
@@ -171,7 +171,7 @@ func TestAuthz_Authorize(t *testing.T) {
 	}
 }
 
-// TestWithAclModel 测试自定义 ACL 模型选项
+// TestWithAclModel 测试自定义 ACL 模型选项。
 func TestWithAclModel(t *testing.T) {
 	customModel := `[request_definition]
 r = sub, obj, act
@@ -196,7 +196,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act]`
 	}
 }
 
-// TestWithAutoLoadPolicyTime 测试自动加载策略时间选项
+// TestWithAutoLoadPolicyTime 测试自动加载策略时间选项。
 func TestWithAutoLoadPolicyTime(t *testing.T) {
 	interval := 15 * time.Second
 	cfg := &authzConfig{}
@@ -207,7 +207,7 @@ func TestWithAutoLoadPolicyTime(t *testing.T) {
 	}
 }
 
-// TestDefaultOptions 测试默认选项
+// TestDefaultOptions 测试默认选项。
 func TestDefaultOptions(t *testing.T) {
 	opts := DefaultOptions()
 	if opts == nil {
@@ -221,7 +221,7 @@ func TestDefaultOptions(t *testing.T) {
 	}
 }
 
-// TestProviderSet 测试 Wire ProviderSet
+// TestProviderSet 测试 Wire ProviderSet。
 func TestProviderSet(t *testing.T) {
 	// Wire 的 ProviderSet 应该被正确定义
 	// 验证 ProviderSet 不为零值
@@ -231,7 +231,7 @@ func TestProviderSet(t *testing.T) {
 	}
 }
 
-// benchmarkAuthorize 基准测试授权性能
+// benchmarkAuthorize 基准测试授权性能。
 func benchmarkAuthorize(b *testing.B, sub, obj, act string) {
 	db := setupTestDB(&testing.T{})
 	authz, _ := NewAuthz(db)

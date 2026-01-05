@@ -10,15 +10,15 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// SlogLogger implements gorm.io/gorm/logger.Interface using Go's log/slog package.
+// SlogLogger 使用 Go 的 log/slog 包实现 gorm.io/gorm/logger.Interface。
 type SlogLogger struct {
 	Logger                    *slog.Logger
-	LogLevel                  logger.LogLevel // GORM log level
-	SlowThreshold             time.Duration   // Slow query threshold
-	IgnoreRecordNotFoundError bool            // Whether to ignore RecordNotFound errors
+	LogLevel                  logger.LogLevel // GORM 日志级别
+	SlowThreshold             time.Duration   // 慢查询阈值
+	IgnoreRecordNotFoundError bool            // 是否忽略 RecordNotFound 错误
 }
 
-// New returns a new SlogLogger instance with sensible defaults.
+// New 返回一个带有合理默认值的新 SlogLogger 实例。
 func New(l *slog.Logger) *SlogLogger {
 	return &SlogLogger{
 		Logger:                    l,
@@ -28,35 +28,35 @@ func New(l *slog.Logger) *SlogLogger {
 	}
 }
 
-// LogMode changes the logger's log level and returns a new instance.
+// LogMode 更改日志记录器的日志级别并返回新实例。
 func (l *SlogLogger) LogMode(level logger.LogLevel) logger.Interface {
 	newLogger := *l
 	newLogger.LogLevel = level
 	return &newLogger
 }
 
-// Info logs informational messages.
+// Info 记录信息性消息。
 func (l *SlogLogger) Info(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= logger.Info {
 		l.Logger.Log(ctx, slog.LevelInfo, fmt.Sprintf(msg, data...))
 	}
 }
 
-// Warn logs warnings.
+// Warn 记录警告消息。
 func (l *SlogLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= logger.Warn {
 		l.Logger.Log(ctx, slog.LevelWarn, fmt.Sprintf(msg, data...))
 	}
 }
 
-// Error logs errors.
+// Error 记录错误消息。
 func (l *SlogLogger) Error(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= logger.Error {
 		l.Logger.Log(ctx, slog.LevelError, fmt.Sprintf(msg, data...))
 	}
 }
 
-// Trace logs SQL statements, duration, rows, and errors.
+// Trace 记录 SQL 语句、执行时长、影响行数和错误。
 func (l *SlogLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	if l.LogLevel <= logger.Silent {
 		return

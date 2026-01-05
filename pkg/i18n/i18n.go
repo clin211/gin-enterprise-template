@@ -13,7 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// I18n is used to store the options and configurations for internationalization.
+// I18n 用于存储国际化的选项和配置。
 type I18n struct {
 	ops       Options
 	bundle    *i18n.Bundle
@@ -21,8 +21,8 @@ type I18n struct {
 	lang      language.Tag
 }
 
-// New creates a new instance of the I18n struct with the given options.
-// It takes a variadic parameter of functional options and returns a pointer to the I18n struct.
+// New 使用给定选项创建 I18n 结构体实例。
+// 接受可变的函数选项参数，并返回指向 I18n 结构体的指针。
 func New(options ...func(*Options)) (rp *I18n) {
 	ops := getOptionsOrSetDefault(nil)
 	for _, f := range options {
@@ -51,7 +51,7 @@ func New(options ...func(*Options)) (rp *I18n) {
 	return
 }
 
-// Select can change language.
+// Select 可以更改语言。
 func (i I18n) Select(lang language.Tag) *I18n {
 	if lang.String() == "und" {
 		lang = i.ops.language
@@ -64,13 +64,13 @@ func (i I18n) Select(lang language.Tag) *I18n {
 	}
 }
 
-// Language get current language.
+// Language 获取当前语言。
 func (i I18n) Language() language.Tag {
 	return i.lang
 }
 
-// LocalizeT localizes the given message and returns the localized string.
-// If unable to translate, it returns the message ID as the default message.
+// LocalizeT 本地化给定消息并返回本地化字符串。
+// 如果无法翻译，则返回消息 ID 作为默认消息。
 func (i I18n) LocalizeT(message *i18n.Message) (rp string) {
 	if message == nil {
 		return ""
@@ -81,29 +81,29 @@ func (i I18n) LocalizeT(message *i18n.Message) (rp string) {
 		DefaultMessage: message,
 	})
 	if err != nil {
-		// use id as default message when unable to translate
+		// 无法翻译时使用 id 作为默认消息
 		rp = message.ID
 	}
 	return
 }
 
-// LocalizeE is a wrapper for LocalizeT method that converts the localized string to an error type and returns it.
+// LocalizeE 是 LocalizeT 方法的包装器，将本地化字符串转换为错误类型并返回。
 func (i I18n) LocalizeE(message *i18n.Message) error {
 	return errors.New(i.LocalizeT(message))
 }
 
-// T localizes the message with the given ID and returns the localized string.
-// It uses the LocalizeT method to perform the translation.
+// T 本地化给定 ID 的消息并返回本地化字符串。
+// 使用 LocalizeT 方法执行翻译。
 func (i I18n) T(id string) (rp string) {
 	return i.LocalizeT(&i18n.Message{ID: id})
 }
 
-// E is a wrapper for T that converts the localized string to an error type and returns it.
+// E 是 T 的包装器，将本地化字符串转换为错误类型并返回。
 func (i I18n) E(id string) error {
 	return errors.New(i.T(id))
 }
 
-// Add is add language file or dir(auto get language by filename).
+// Add 添加语言文件或目录(通过文件名自动获取语言)。
 func (i *I18n) Add(f string) {
 	info, err := os.Stat(f)
 	if err != nil {
@@ -121,7 +121,7 @@ func (i *I18n) Add(f string) {
 	}
 }
 
-// AddFS is add language embed files.
+// AddFS 添加语言嵌入文件。
 func (i *I18n) AddFS(fs embed.FS) {
 	files := readFS(fs, ".")
 	for _, name := range files {

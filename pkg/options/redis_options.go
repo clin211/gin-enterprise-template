@@ -12,7 +12,7 @@ import (
 
 var _ IOptions = (*RedisOptions)(nil)
 
-// RedisOptions defines options for redis cluster.
+// RedisOptions 定义 redis 集群的选项。
 type RedisOptions struct {
 	Addr         string        `json:"addr" mapstructure:"addr"`
 	Username     string        `json:"username" mapstructure:"username"`
@@ -25,11 +25,11 @@ type RedisOptions struct {
 	WriteTimeout time.Duration `json:"write-timeout" mapstructure:"write-timeout"`
 	PoolTimeout  time.Duration `json:"pool-time" mapstructure:"pool-time"`
 	PoolSize     int           `json:"pool-size" mapstructure:"pool-size"`
-	// tracing switch
+	// 追踪开关
 	EnableTrace bool `json:"enable-trace" mapstructure:"enable-trace"`
 }
 
-// NewRedisOptions create a `zero` value instance.
+// NewRedisOptions 创建一个`零值`实例。
 func NewRedisOptions() *RedisOptions {
 	return &RedisOptions{
 		Addr:         "127.0.0.1:6379",
@@ -46,7 +46,7 @@ func NewRedisOptions() *RedisOptions {
 	}
 }
 
-// Validate verifies flags passed to RedisOptions.
+// Validate 验证传递给 RedisOptions 的标志。
 func (o *RedisOptions) Validate() []error {
 	errs := []error{}
 
@@ -61,7 +61,7 @@ func (o *RedisOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags adds flags related to redis storage for a specific APIServer to the specified FlagSet.
+// AddFlags 将与特定 API 服务器的 redis 存储相关的标志添加到指定的 FlagSet。
 func (o *RedisOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Addr, fullPrefix+".addr", o.Addr, "Address of your Redis server(ip:port).")
 	fs.StringVar(&o.Username, fullPrefix+".username", o.Username, "Username for access to redis service.")

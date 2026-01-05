@@ -9,46 +9,46 @@ import (
 	"gorm.io/gorm"
 )
 
-// ProviderSet is a Wire provider set that declares dependency injection rules.
-// It includes the NewStore constructor function to generate datastore instances.
-// wire.Bind is used to bind the IStore interface to the concrete implementation *datastore,
-// allowing automatic injection of *datastore instances wherever IStore is required.
+// ProviderSet 是 Wire 提供者集，用于声明依赖注入规则。
+// 它包含 NewStore 构造函数，用于生成 datastore 实例。
+// wire.Bind 用于将 IStore 接口绑定到具体实现 *datastore，
+// 允许在需要 IStore 的任何地方自动注入 *datastore 实例。
 var ProviderSet = wire.NewSet(NewStore, wire.Bind(new(IStore), new(*datastore)))
 
 var (
 	once sync.Once
-	// S is a global variable for convenient access to the initialized datastore
-	// instance from other packages.
+	// S 是一个全局变量，用于方便地从其他包访问已初始化的 datastore
+	// 实例。
 	S *datastore
 )
 
-// IStore defines the methods that the Store layer needs to implement.
+// IStore 定义了 Store 层需要实现的方法。
 type IStore interface {
-	// DB returns the *gorm.DB instance of the Store layer, which might be used in rare cases.
+	// DB 返回 Store 层的 *gorm.DB 实例，可能在少数情况下使用。
 	DB(ctx context.Context, wheres ...where.Where) *gorm.DB
-	// TX is used to implement transactions in the Biz layer.
+	// TX 用于在 Biz 层实现事务。
 	TX(ctx context.Context, fn func(ctx context.Context) error) error
 	User() UserStore
 }
 
-// transactionKey is the key used to store transaction context in context.Context.
+// transactionKey 是用于在 context.Context 中存储事务上下文的键。
 type transactionKey struct{}
 
-// datastore is the concrete implementation of the IStore.
+// datastore 是 IStore 的具体实现。
 type datastore struct {
 	core *gorm.DB
 
-	// Additional database instances can be added as needed.
-	// Example: fake *gorm.DB
+	// 可以根据需要添加其他数据库实例。
+	// 示例：fake *gorm.DB
 }
 
-// Ensure datastore implements the IStore.
+// 确保 datastore 实现了 IStore 接口。
 var _ IStore = (*datastore)(nil)
 
-// NewStore initializes a singleton instance of type IStore.
-// It ensures that the datastore is only created once using sync.Once.
+// NewStore 初始化 IStore 类型的单例实例。
+// 它使用 sync.Once 确保 datastore 只创建一次。
 func NewStore(db *gorm.DB) *datastore {
-	// Initialize the singleton datastore instance only once.
+	// 仅初始化一次单例 datastore 实例。
 	once.Do(func() {
 		S = &datastore{db}
 	})
@@ -56,28 +56,28 @@ func NewStore(db *gorm.DB) *datastore {
 	return S
 }
 
-// DB filters the database instance based on the input conditions (wheres).
-// If no conditions are provided, the function returns the database instance
-// from the context (transaction instance or core database instance).
+// DB 根据输入条件（wheres）过滤数据库实例。
+// 如果未提供条件，函数将从上下文返回数据库实例
+//（事务实例或核心数据库实例）。
 func (store *datastore) DB(ctx context.Context, wheres ...where.Where) *gorm.DB {
 	db := store.core
-	// Attempt to retrieve the transaction instance from the context.
+	// 尝试从上下文中检索事务实例。
 	if tx, ok := ctx.Value(transactionKey{}).(*gorm.DB); ok {
 		db = tx
 	}
 
-	// Apply each provided 'where' condition to the query.
+	// 将每个提供的 'where' 条件应用于查询。
 	for _, whr := range wheres {
 		db = whr.Where(db)
 	}
 	return db
 }
 
-// FakeDB is used to demonstrate multiple database instances.
-// It returns a nil gorm.DB, indicating a fake database.
+// FakeDB 用于演示多个数据库实例。
+// 它返回一个 nil 的 gorm.DB，表示一个假数据库。
 func (ds *datastore) FakeDB(ctx context.Context) *gorm.DB { return nil }
 
-// TX starts a new transaction instance.
+// TX 启动一个新的事务实例。
 // nolint: fatcontext
 func (store *datastore) TX(ctx context.Context, fn func(ctx context.Context) error) error {
 	return store.core.WithContext(ctx).Transaction(

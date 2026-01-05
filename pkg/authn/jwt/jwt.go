@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	// reason holds the error reason.
+	// reason 保存错误原因。
 	reason string = "Unauthorized"
 
-	// defaultKey holds the default key used to sign a jwt token.
+	// defaultKey 保存用于签名 JWT 令牌的默认密钥。
 	defaultKey = "onex(#)666"
 )
 
-// UnauthorizedError represents an unauthorized error
+// UnauthorizedError 表示一个未授权错误
 type UnauthorizedError struct {
 	Reason string
 	Msg    string
@@ -41,7 +41,7 @@ var (
 	ErrSignTokenFailed        = unauthorized(reason, "Failed to sign token")
 )
 
-// Define i18n messages.
+// 定义 i18n 消息。
 var (
 	MessageTokenInvalid           = &goi18n.Message{ID: "jwt.token.invalid", Other: ErrTokenInvalid.Error()}
 	MessageTokenExpired           = &goi18n.Message{ID: "jwt.token.expired", Other: ErrTokenExpired.Error()}
@@ -73,52 +73,52 @@ type options struct {
 	tokenHeader   map[string]any
 }
 
-// Option is jwt option.
+// Option 是 JWT 选项。
 type Option func(*options)
 
-// WithSigningMethod set signature method.
+// WithSigningMethod 设置签名方法。
 func WithSigningMethod(method jwt.SigningMethod) Option {
 	return func(o *options) {
 		o.signingMethod = method
 	}
 }
 
-// WithIssuer set token issuer which is identifies the principal that issued the JWT.
+// WithIssuer 设置令牌颁发者，用于标识颁发 JWT 的主体。
 func WithIssuer(issuer string) Option {
 	return func(o *options) {
 		o.issuer = issuer
 	}
 }
 
-// WithSigningKey set the signature key.
+// WithSigningKey 设置签名密钥。
 func WithSigningKey(key any) Option {
 	return func(o *options) {
 		o.signingKey = key
 	}
 }
 
-// WithKeyfunc set the callback function for verifying the key.
+// WithKeyfunc 设置用于验证密钥的回调函数。
 func WithKeyfunc(keyFunc jwt.Keyfunc) Option {
 	return func(o *options) {
 		o.keyfunc = keyFunc
 	}
 }
 
-// WithExpired set the token expiration time (in seconds, default 2h).
+// WithExpired 设置令牌过期时间（默认为 2 小时）。
 func WithExpired(expired time.Duration) Option {
 	return func(o *options) {
 		o.expired = expired
 	}
 }
 
-// WithTokenHeader set the customer tokenHeader for client side.
+// WithTokenHeader 设置客户端使用的自定义令牌头。
 func WithTokenHeader(header map[string]any) Option {
 	return func(o *options) {
 		o.tokenHeader = header
 	}
 }
 
-// New create a authentication instance.
+// New 创建一个认证实例。
 func New(store Storer, opts ...Option) *JWTAuth {
 	o := defaultOptions
 	for _, opt := range opts {
@@ -128,13 +128,13 @@ func New(store Storer, opts ...Option) *JWTAuth {
 	return &JWTAuth{opts: &o, store: store}
 }
 
-// JWTAuth implement the authn.Authenticator interface.
+// JWTAuth 实现 authn.Authenticator 接口。
 type JWTAuth struct {
 	opts  *options
 	store Storer
 }
 
-// Sign is used to generate a token.
+// Sign 用于生成令牌。
 func (a *JWTAuth) Sign(ctx context.Context, userID string) (authn.IToken, error) {
 	now := time.Now()
 	expiresAt := now.Add(a.opts.expired)
@@ -171,7 +171,7 @@ func (a *JWTAuth) Sign(ctx context.Context, userID string) (authn.IToken, error)
 	return tokenInfo, nil
 }
 
-// parseToken is used to parse the input refreshToken.
+// parseToken 用于解析输入的刷新令牌。
 func (a *JWTAuth) parseToken(ctx context.Context, refreshToken string) (*jwt.RegisteredClaims, error) {
 	token, err := jwt.ParseWithClaims(refreshToken, &jwt.RegisteredClaims{}, a.opts.keyfunc)
 	if err != nil {
@@ -206,14 +206,14 @@ func (a *JWTAuth) callStore(fn func(Storer) error) error {
 	return nil
 }
 
-// Destroy is used to destroy a token.
+// Destroy 用于销毁令牌。
 func (a *JWTAuth) Destroy(ctx context.Context, refreshToken string) error {
 	claims, err := a.parseToken(ctx, refreshToken)
 	if err != nil {
 		return err
 	}
 
-	// If storage is set, put the unexpired token in
+	// 如果设置了存储，将未过期的令牌放入其中
 	store := func(store Storer) error {
 		expired := time.Until(claims.ExpiresAt.Time)
 		return store.Set(ctx, refreshToken, expired)
@@ -221,7 +221,7 @@ func (a *JWTAuth) Destroy(ctx context.Context, refreshToken string) error {
 	return a.callStore(store)
 }
 
-// ParseClaims parse the token and return the claims.
+// ParseClaims 解析令牌并返回声明。
 func (a *JWTAuth) ParseClaims(ctx context.Context, refreshToken string) (*jwt.RegisteredClaims, error) {
 	if refreshToken == "" {
 		return nil, unauthorized(reason, i18n.FromContext(ctx).LocalizeT(MessageTokenInvalid))
@@ -252,7 +252,7 @@ func (a *JWTAuth) ParseClaims(ctx context.Context, refreshToken string) (*jwt.Re
 	return claims, nil
 }
 
-// Release used to release the requested resources.
+// Release 用于释放请求的资源。
 func (a *JWTAuth) Release() error {
 	return a.callStore(func(store Storer) error {
 		return store.Close()

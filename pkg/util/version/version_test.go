@@ -55,8 +55,8 @@ func testOne(v *Version, item, prev testItem) error {
 
 func TestSemanticVersions(t *testing.T) {
 	tests := []testItem{
-		// This is every version string that appears in the 2.0 semver spec,
-		// sorted in strictly increasing order except as noted.
+		// 这是 2.0 semver 规范中出现的每个版本字符串，
+		// 除特别说明外，按严格递增顺序排序。
 		{version: "0.1.0"},
 		{version: "1.0.0-0.3.7"},
 		{version: "1.0.0-alpha"},
@@ -81,7 +81,7 @@ func TestSemanticVersions(t *testing.T) {
 		{version: "2.1.1"},
 		{version: "42.0.0"},
 
-		// We also allow whitespace and "v" prefix
+		// 我们还允许空格和 "v" 前缀
 		{version: "   42.0.0", unparsed: "42.0.0", equalsPrev: true},
 		{version: "\t42.0.0  ", unparsed: "42.0.0", equalsPrev: true},
 		{version: "43.0.0-1", unparsed: "43.0.0-1"},
@@ -108,7 +108,7 @@ func TestSemanticVersions(t *testing.T) {
 
 func TestBadSemanticVersions(t *testing.T) {
 	tests := []string{
-		// "MUST take the form X.Y.Z"
+		// "必须采用 X.Y.Z 的形式"
 		"1",
 		"1.2",
 		"1.2.3.4",
@@ -117,7 +117,7 @@ func TestBadSemanticVersions(t *testing.T) {
 		"1.2.",
 		"",
 		"..",
-		// "where X, Y, and Z are non-negative integers"
+		// "其中 X、Y 和 Z 是非负整数"
 		"-1.2.3",
 		"1.-2.3",
 		"1.2.-3",
@@ -128,28 +128,28 @@ func TestBadSemanticVersions(t *testing.T) {
 		"a.b.c",
 		"1 .2.3",
 		"1. 2.3",
-		// "and MUST NOT contain leading zeroes."
+		// "并且不能包含前导零。"
 		"01.2.3",
 		"1.02.3",
 		"1.2.03",
-		// "[pre-release] identifiers MUST comprise only ASCII alphanumerics and hyphen"
+		// "[预发布] 标识符必须仅包含 ASCII 字母数字和连字符"
 		"1.2.3-/",
-		// "[pre-release] identifiers MUST NOT be empty"
+		// "[预发布] 标识符不能为空"
 		"1.2.3-",
 		"1.2.3-.",
 		"1.2.3-foo.",
 		"1.2.3-.foo",
-		// "Numeric [pre-release] identifiers MUST NOT include leading zeroes"
+		// "数字 [预发布] 标识符不能包含前导零"
 		"1.2.3-01",
-		// "[build metadata] identifiers MUST comprise only ASCII alphanumerics and hyphen"
+		// "[构建元数据] 标识符必须仅包含 ASCII 字母数字和连字符"
 		"1.2.3+/",
-		// "[build metadata] identifiers MUST NOT be empty"
+		// "[构建元数据] 标识符不能为空"
 		"1.2.3+",
 		"1.2.3+.",
 		"1.2.3+foo.",
 		"1.2.3+.foo",
 
-		// whitespace/"v"-prefix checks
+		// 空格/"v"-前缀检查
 		"v 1.2.3",
 		"vv1.2.3",
 	}
@@ -164,9 +164,9 @@ func TestBadSemanticVersions(t *testing.T) {
 
 func TestGenericVersions(t *testing.T) {
 	tests := []testItem{
-		// This is all of the strings from TestSemanticVersions, plus some strings
-		// from TestBadSemanticVersions that should parse as generic versions,
-		// plus some additional strings.
+		// 这是 TestSemanticVersions 中的所有字符串，加上一些字符串
+		// 来自 TestBadSemanticVersions，应该解析为通用版本，
+		// 加上一些额外的字符串。
 		{version: "0.1.0", unparsed: "0.1.0"},
 		{version: "1.0.0-0.3.7", unparsed: "1.0.0"},
 		{version: "1.0.0-alpha", unparsed: "1.0.0", equalsPrev: true},
@@ -414,10 +414,10 @@ func TestHighestSupportedVersion(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		// Arrange & Act
+		// 准备 & 执行
 		actual, err := HighestSupportedVersion(tc.versions)
 
-		// Assert
+		// 断言
 		if tc.shouldFail && err == nil {
 			t.Fatalf("expecting highestSupportedVersion to fail, but got nil error for testcase: %#v", tc)
 		}

@@ -8,14 +8,14 @@ import (
 
 var _ IOptions = (*MetricsOptions)(nil)
 
-// MetricsOptions has all parameters needed for exposing metrics from components.
+// MetricsOptions 包含从组件公开指标所需的所有参数。
 type MetricsOptions struct {
 	ShowHiddenMetricsForVersion string            `json:"show-hidden-metrics-for-version" mapstructure:"show-hidden-metrics-for-version"`
 	DisabledMetrics             []string          `json:"disabled-metrics" mapstructure:"disabled-metrics"`
 	AllowListMapping            map[string]string `json:"allow-metric-labels" mapstructure:"allow-metric-labels"`
 }
 
-// NewMetricsOptions returns default metrics options.
+// NewMetricsOptions 返回默认指标选项。
 func NewMetricsOptions() *MetricsOptions {
 	opts := metrics.NewOptions()
 
@@ -30,12 +30,12 @@ func (o *MetricsOptions) Native() *metrics.Options {
 	return &opts
 }
 
-// Validate validates metrics flags options.
+// Validate 验证指标标志选项。
 func (o *MetricsOptions) Validate() []error {
 	return o.Native().Validate()
 }
 
-// AddFlags adds flags for exposing component metrics.
+// AddFlags 添加用于公开组件指标的标志。
 func (o *MetricsOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.ShowHiddenMetricsForVersion, fullPrefix+".show-hidden-metrics-for-version", o.ShowHiddenMetricsForVersion,
 		"The previous version for which you want to show hidden metrics. "+

@@ -11,9 +11,9 @@ import (
 	"go.opentelemetry.io/otel/log"
 )
 
-// convertValue converts various types to log.Value.
+// convertValue 将各种类型转换为 log.Value。
 func convertValue(v any) log.Value {
-	// Handling the most common types without reflect is a small perf win.
+	// 在不使用 reflect 的情况下处理最常见的类型是一个小的性能提升。
 	switch val := v.(type) {
 	case bool:
 		return log.BoolValue(val)
@@ -104,16 +104,15 @@ func convertValue(v any) log.Value {
 		return convertValue(val.Elem().Interface())
 	}
 
-	// Try to handle this as gracefully as possible.
+	// 尽可能优雅地处理此情况。
 	//
-	// Don't panic here. it is preferable to have user's open issue
-	// asking why their attributes have a "unhandled: " prefix than
-	// say that their code is panicking.
+	// 不要在这里 panic。让用户提问为什么他们的属性有"unhandled: "前缀
+	// 比说他们的代码正在 panic 更可取。
 	return log.StringValue(fmt.Sprintf("unhandled: (%s) %+v", t, v))
 }
 
-// convertUintValue converts a uint64 to a log.Value.
-// If the value is too large to fit in an int64, it is converted to a string.
+// convertUintValue 将 uint64 转换为 log.Value。
+// 如果值太大而无法放入 int64，它将被转换为字符串。
 func convertUintValue(v uint64) log.Value {
 	if v > math.MaxInt64 {
 		return log.StringValue(strconv.FormatUint(v, 10))

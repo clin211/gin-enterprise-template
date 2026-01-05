@@ -11,7 +11,7 @@ import (
 	"github.com/clin211/gin-enterprise-template/internal/pkg/contextx"
 )
 
-// Context is a middleware that injects common prefix fields to gin.Context.
+// Context 是一个中间件，用于将通用前缀字段注入到 gin.Context 中。
 func Context() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从当前 span 中获取 traceID 并设置到 gin.Context

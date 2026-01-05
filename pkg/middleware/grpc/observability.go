@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/peer"
 )
 
-// --- Trace Header Constants ---
+// --- 追踪头常量 ---
 const (
 	TraceParentHeaderKey = "traceparent"
 	TraceIDHeaderKey     = "X-Trace-Id"
@@ -21,7 +21,7 @@ const (
 	TraceStateHeaderKey  = "tracestate"
 )
 
-// --- Trace Injection Mode ---
+// --- 追踪注入模式 ---
 type TraceInjectionMode int
 
 const (
@@ -31,13 +31,13 @@ const (
 	InjectNone
 )
 
-// --- Configuration ---
+// --- 配置 ---
 type ObservabilityOptions struct {
 	TraceInjectionMode TraceInjectionMode
 	CustomTraceHeader  string
 }
 
-// --- Option Pattern ---
+// --- 选项模式 ---
 type Option func(*ObservabilityOptions)
 
 func WithTraceInjection(mode TraceInjectionMode) Option {
@@ -48,7 +48,7 @@ func WithCustomTraceHeader(header string) Option {
 	return func(o *ObservabilityOptions) { o.CustomTraceHeader = header }
 }
 
-// --- Main Interceptor ---
+// --- 主拦截器 ---
 func Observability(opts ...Option) grpc.UnaryServerInterceptor {
 	cfg := &ObservabilityOptions{TraceInjectionMode: InjectTraceIDOnly}
 	for _, opt := range opts {
@@ -59,23 +59,23 @@ func Observability(opts ...Option) grpc.UnaryServerInterceptor {
 		start := time.Now()
 		spanCtx := trace.SpanFromContext(ctx).SpanContext()
 
-		// Inject trace headers
+		// 注入追踪头
 		md, _ := metadata.FromIncomingContext(ctx)
 		md = injectTraceMetadata(ctx, md, spanCtx, cfg)
 		ctx = metadata.NewIncomingContext(ctx, md)
 		isDebugLevel := isDebugEnabled()
 
-		// Optional: capture request payload
+		// 可选：捕获请求负载
 		var requestBody string
 		if isDebugLevel && req != nil {
 			data, _ := json.Marshal(req)
 			requestBody = string(data)
 		}
 
-		// Process RPC
+		// 处理 RPC
 		resp, err := handler(ctx, req)
 
-		// Optional: capture response payload
+		// 可选：捕获响应负载
 		var responseBody string
 		if isDebugLevel && resp != nil {
 			data, _ := json.Marshal(resp)
@@ -84,7 +84,7 @@ func Observability(opts ...Option) grpc.UnaryServerInterceptor {
 
 		duration := time.Since(start).Seconds()
 
-		// Peer Info
+		// 对端信息
 		var clientIP string
 		if p, ok := peer.FromContext(ctx); ok {
 			clientIP = p.Addr.String()
@@ -95,7 +95,7 @@ func Observability(opts ...Option) grpc.UnaryServerInterceptor {
 			status = "ERROR"
 		}
 
-		// Build structured log
+		// 构建结构化日志
 		rpcData := map[string]any{
 			"request": map[string]any{
 				"method": info.FullMethod,
@@ -137,7 +137,7 @@ func Observability(opts ...Option) grpc.UnaryServerInterceptor {
 	}
 }
 
-// --- Inject Trace Metadata ---
+// --- 注入追踪元数据 ---
 func injectTraceMetadata(ctx context.Context, md metadata.MD, spanCtx trace.SpanContext, cfg *ObservabilityOptions) metadata.MD {
 	if !spanCtx.IsValid() {
 		return md
@@ -174,7 +174,7 @@ func injectTraceMetadata(ctx context.Context, md metadata.MD, spanCtx trace.Span
 		md.Set(header, traceID)
 
 	case InjectNone:
-		// no-op
+		// 无操作
 	}
 
 	// 将请求 ID 设置到响应的 Header Metadata 中
@@ -191,7 +191,7 @@ func isDebugEnabled() bool {
 	return slog.Default().Enabled(context.Background(), slog.LevelDebug)
 }
 
-// --- Convenience Wrappers ---
+// --- 便捷封装函数 ---
 func ObservabilityWithW3CTraceContext() grpc.UnaryServerInterceptor {
 	return Observability(WithTraceInjection(InjectW3CTraceContext))
 }

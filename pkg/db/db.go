@@ -5,7 +5,7 @@ import (
 	redis "github.com/redis/go-redis/v9"
 )
 
-// ProviderSet is db providers.
+// ProviderSet 是数据库提供者集合.
 var ProviderSet = wire.NewSet(
 	NewMySQL,
 	NewRedis,

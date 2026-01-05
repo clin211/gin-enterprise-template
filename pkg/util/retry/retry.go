@@ -13,7 +13,7 @@ const (
 	backoffJitter   = 1.0
 )
 
-// Retry retries a given function with exponential backoff.
+// Retry 使用指数退避重试给定的函数。
 func Retry(fn wait.ConditionFunc, initialBackoffSec int) error {
 	if initialBackoffSec <= 0 {
 		initialBackoffSec = backoffDuration
@@ -31,14 +31,12 @@ func Retry(fn wait.ConditionFunc, initialBackoffSec int) error {
 	return nil
 }
 
-// Poll tries a condition func until it returns true, an error, or the timeout
-// is reached.
+// Poll 尝试一个条件函数，直到它返回 true、错误或达到超时。
 func Poll(interval, timeout time.Duration, condition wait.ConditionFunc) error {
 	return wait.Poll(interval, timeout, condition)
 }
 
-// PollImmediate tries a condition func until it returns true, an error, or the timeout
-// is reached.
+// PollImmediate 尝试一个条件函数，直到它返回 true、错误或达到超时。
 func PollImmediate(interval, timeout time.Duration, condition wait.ConditionFunc) error {
 	return wait.PollImmediate(interval, timeout, condition)
 }

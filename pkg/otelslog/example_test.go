@@ -7,9 +7,9 @@ import (
 )
 
 func Example() {
-	// Use a working LoggerProvider implementation instead e.g. using go.opentelemetry.io/otel/sdk/log.
+	// 改为使用可工作的 LoggerProvider 实现，例如使用 go.opentelemetry.io/otel/sdk/log。
 	provider := noop.NewLoggerProvider()
 
-	// Create an *slog.Logger and use it in your application.
+	// 创建一个 *slog.Logger 并在您的应用程序中使用它。
 	otelslog.NewLogger("my/pkg/name", otelslog.WithLoggerProvider(provider))
 }

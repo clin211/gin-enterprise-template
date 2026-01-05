@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// PostgreSQLOptions defines options for PostgreSQL database.
+// PostgreSQLOptions 定义 PostgreSQL 数据库的配置选项.
 type PostgreSQLOptions struct {
 	Addr                  string
 	Username              string
@@ -23,7 +23,7 @@ type PostgreSQLOptions struct {
 	Logger logger.Interface
 }
 
-// DSN return DSN from PostgreSQLOptions.
+// DSN 从 PostgreSQLOptions 返回数据源名称(DSN).
 func (o *PostgreSQLOptions) DSN() string {
 	splited := strings.Split(o.Addr, ":")
 	host, port := splited[0], "5432"
@@ -40,14 +40,14 @@ func (o *PostgreSQLOptions) DSN() string {
 	)
 }
 
-// NewPostgreSQL create a new gorm db instance with the given options.
+// NewPostgreSQL 使用给定的选项创建一个新的 gorm 数据库实例.
 func NewPostgreSQL(opts *PostgreSQLOptions) (*gorm.DB, error) {
-	// Set default values to ensure all fields in opts are available.
+	// 设置默认值以确保 opts 中的所有字段都可用.
 	setPostgreSQLDefaults(opts)
 
 	db, err := gorm.Open(postgres.Open(opts.DSN()), &gorm.Config{
-		// PrepareStmt executes the given query in cached statement.
-		// This can improve performance.
+		// PrepareStmt 在缓存语句中执行给定的查询.
+		// 这可以提高性能.
 		PrepareStmt: true,
 		Logger:      opts.Logger,
 	})
@@ -60,19 +60,19 @@ func NewPostgreSQL(opts *PostgreSQLOptions) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	// SetMaxOpenConns 设置数据库的最大打开连接数.
 	sqlDB.SetMaxOpenConns(opts.MaxOpenConnections)
 
-	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
+	// SetConnMaxLifetime 设置连接可重用的最长时间.
 	sqlDB.SetConnMaxLifetime(opts.MaxConnectionLifeTime)
 
-	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	// SetMaxIdleConns 设置空闲连接池中的最大连接数.
 	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
 
 	return db, nil
 }
 
-// setPostgreSQLDefaults set available default values for some fields.
+// setPostgreSQLDefaults 为某些字段设置可用的默认值.
 func setPostgreSQLDefaults(opts *PostgreSQLOptions) {
 	if opts.Addr == "" {
 		opts.Addr = "127.0.0.1:5432"

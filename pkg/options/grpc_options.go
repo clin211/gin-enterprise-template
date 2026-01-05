@@ -8,21 +8,21 @@ import (
 
 var _ IOptions = (*GRPCOptions)(nil)
 
-// GRPCOptions are for creating an unauthenticated, unauthorized, insecure port.
-// No one should be using these anymore.
+// GRPCOptions 用于创建未认证、未授权、不安全的端口。
+// 不应该再使用这些选项。
 type GRPCOptions struct {
-	// Network with server network.
+	// 服务器网络类型。
 	Network string `json:"network" mapstructure:"network"`
 
-	// Address with server address.
+	// 服务器地址。
 	Addr string `json:"addr" mapstructure:"addr"`
 
-	// Timeout with server timeout. Used by grpc client side.
+	// 服务器超时时间。由 gRPC 客户端使用。
 	Timeout time.Duration `json:"timeout" mapstructure:"timeout"`
 }
 
-// NewGRPCOptions is for creating an unauthenticated, unauthorized, insecure port.
-// No one should be using these anymore.
+// NewGRPCOptions 用于创建未认证、未授权、不安全的端口。
+// 不应该再使用这些选项。
 func NewGRPCOptions() *GRPCOptions {
 	return &GRPCOptions{
 		Network: "tcp",
@@ -31,8 +31,7 @@ func NewGRPCOptions() *GRPCOptions {
 	}
 }
 
-// Validate is used to parse and validate the parameters entered by the user at
-// the command line when the program starts.
+// Validate 用于解析和验证用户在程序启动时在命令行输入的参数。
 func (o *GRPCOptions) Validate() []error {
 	var errors []error
 
@@ -43,8 +42,8 @@ func (o *GRPCOptions) Validate() []error {
 	return errors
 }
 
-// AddFlags adds flags related to features for a specific api server to the
-// specified FlagSet.
+// AddFlags 将与特定 API 服务器的功能相关的标志添加到
+// 指定的 FlagSet。
 func (o *GRPCOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Network, fullPrefix+".network", o.Network, "Specify the network for the gRPC server.")
 	fs.StringVar(&o.Addr, fullPrefix+".addr", o.Addr, "Specify the gRPC server bind address and port.")

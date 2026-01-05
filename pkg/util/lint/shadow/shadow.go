@@ -25,7 +25,7 @@ func init() {
 		pass.Report = func(diag analysis.Diagnostic) {
 			for _, permittedShadow := range permittedShadows {
 				if strings.HasPrefix(diag.Message, fmt.Sprintf("declaration of %q shadows declaration at line", permittedShadow)) {
-					// Can throw the failure away.
+					// 可以丢弃失败。
 					return
 				}
 			}

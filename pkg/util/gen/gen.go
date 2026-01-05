@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 )
 
-// OutDir creates the absolute path name from path and checks path exists.
-// Returns absolute path including trailing '/' or error if path does not exist.
+// OutDir 从路径创建绝对路径名并检查路径是否存在。
+// 返回包括尾随 '/' 的绝对路径，如果路径不存在则返回错误。
 func OutDir(path string) (string, error) {
 	outDir, err := filepath.Abs(path)
 	if err != nil {

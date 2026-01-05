@@ -13,25 +13,25 @@ import (
 
 var _ IOptions = (*SlogOptions)(nil)
 
-// SlogOptions contains configuration items related to slog.
+// SlogOptions 包含与 slog 相关的配置项。
 type SlogOptions struct {
-	// Level specifies the minimum log level to output.
-	// Possible values: debug, info, warn, error
+	// Level 指定要输出的最低日志级别。
+	// 可能的值：debug、info、warn、error
 	Level string `json:"level,omitempty" mapstructure:"level"`
-	// AddSource adds source code position (file:line) to log records
+	// AddSource 将源代码位置（文件:行）添加到日志记录
 	AddSource bool `json:"add-source,omitempty" mapstructure:"add-source"`
-	// Format specifies the structure of log messages.
-	// Possible values: json, text
+	// Format 指定日志消息的结构。
+	// 可能的值：json、text
 	Format string `json:"format,omitempty" mapstructure:"format"`
-	// TimeFormat specifies the time format for text output.
-	// Uses Go time format layout. Empty means RFC3339.
+	// TimeFormat 指定文本输出的时间格式。
+	// 使用 Go 时间格式布局。空值表示 RFC3339。
 	TimeFormat string `json:"time-format,omitempty" mapstructure:"time-format"`
-	// Output specifies where to write logs.
-	// Possible values: stdout, stderr, or file path
+	// Output 指定写入日志的位置。
+	// 可能的值：stdout、stderr 或文件路径
 	Output string `json:"output,omitempty" mapstructure:"output"`
 }
 
-// NewSlogOptions creates an Options object with default parameters.
+// NewSlogOptions 创建带有默认参数的 Options 对象。
 func NewSlogOptions() *SlogOptions {
 	return &SlogOptions{
 		Level:      "info",
@@ -42,27 +42,27 @@ func NewSlogOptions() *SlogOptions {
 	}
 }
 
-// Validate verifies flags passed to SlogOptions.
+// Validate 验证传递给 SlogOptions 的标志。
 func (o *SlogOptions) Validate() []error {
 	var errs []error
 
-	// Validate log level
+	// 验证日志级别
 	switch strings.ToUpper(strings.TrimSpace(o.Level)) {
 	case "DEBUG", "INFO", "WARN", "WARNING", "ERROR":
 	default:
 		errs = append(errs, fmt.Errorf("invalid log level: %s (must be debug, info, warn, or error)", o.Level))
 	}
 
-	// Validate format
+	// 验证格式
 	switch o.Format {
 	case "json", "text":
 	default:
 		errs = append(errs, fmt.Errorf("invalid log format: %s (must be json or text)", o.Format))
 	}
 
-	// Validate output
+	// 验证输出
 	if o.Output != "stdout" && o.Output != "stderr" && o.Output != "" {
-		// Check if it's a valid file path (basic validation)
+		// 检查是否为有效的文件路径（基本验证）
 		if !filepath.IsAbs(o.Output) && !strings.Contains(o.Output, "/") {
 			errs = append(errs, fmt.Errorf("invalid output path: %s", o.Output))
 		}
@@ -71,7 +71,7 @@ func (o *SlogOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags adds command line flags for the configuration.
+// AddFlags 为配置添加命令行标志。
 func (o *SlogOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Level, fullPrefix+".level", o.Level, "Sets the log level. Permitted levels: debug, info, warn, error.")
 	fs.StringVar(&o.Format, fullPrefix+".format", o.Format, "Sets the log format. Permitted formats: json, text.")
@@ -82,7 +82,7 @@ func (o *SlogOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Output, fullPrefix+".output", o.Output, "Log output destination (stdout, stderr, or file path).")
 }
 
-// ToSlogLevel converts string level to slog.Level.
+// ToSlogLevel 将字符串级别转换为 slog.Level。
 func (o *SlogOptions) ToSlogLevel() slog.Level {
 	switch strings.ToUpper(strings.TrimSpace(o.Level)) {
 	case "DEBUG":
@@ -94,12 +94,12 @@ func (o *SlogOptions) ToSlogLevel() slog.Level {
 	case "ERROR":
 		return slog.LevelError
 	default:
-		// Default to INFO if unknown level
+		// 如果未知级别，默认为 INFO
 		return slog.LevelInfo
 	}
 }
 
-// GetWriter returns the appropriate io.Writer based on output configuration.
+// GetWriter 根据输出配置返回适当的 io.Writer。
 func (o *SlogOptions) GetWriter() (io.Writer, error) {
 	switch o.Output {
 	case "stdout", "":
@@ -107,7 +107,7 @@ func (o *SlogOptions) GetWriter() (io.Writer, error) {
 	case "stderr":
 		return os.Stderr, nil
 	default:
-		// File output
+		// 文件输出
 		file, err := os.OpenFile(o.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open log file %s: %w", o.Output, err)
@@ -116,7 +116,7 @@ func (o *SlogOptions) GetWriter() (io.Writer, error) {
 	}
 }
 
-// BuildHandler creates a slog.Handler based on the configuration.
+// BuildHandler 根据配置创建 slog.Handler。
 func (o *SlogOptions) BuildHandler() (slog.Handler, error) {
 	writer, err := o.GetWriter()
 	if err != nil {
@@ -128,7 +128,7 @@ func (o *SlogOptions) BuildHandler() (slog.Handler, error) {
 		AddSource: o.AddSource,
 	}
 
-	// Set custom time format for text handler
+	// 为文本处理程序设置自定义时间格式
 	if o.Format == "text" && o.TimeFormat != "" {
 		opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.TimeKey {
@@ -151,7 +151,7 @@ func (o *SlogOptions) BuildHandler() (slog.Handler, error) {
 	return handler, nil
 }
 
-// BuildLogger constructs and returns a configured slog.Logger instance without affecting the global logger.
+// BuildLogger 构造并返回已配置的 slog.Logger 实例，而不影响全局日志记录器。
 func (o *SlogOptions) BuildLogger() (*slog.Logger, error) {
 	handler, err := o.BuildHandler()
 	if err != nil {
@@ -160,7 +160,7 @@ func (o *SlogOptions) BuildLogger() (*slog.Logger, error) {
 	return slog.New(handler), nil
 }
 
-// Apply applies the configuration to the global default slog logger.
+// Apply 将配置应用于全局默认 slog 日志记录器。
 func (o *SlogOptions) Apply() error {
 	logger, err := o.BuildLogger()
 	if err != nil {

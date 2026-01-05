@@ -14,14 +14,14 @@ import (
 	"github.com/clin211/gin-enterprise-template/internal/pkg/errno"
 )
 
-// UserRetriever 用于根据用户名获取用户的接口.
+// UserRetriever 是用于根据用户名获取用户的接口。
 type UserRetriever interface {
-	// GetUser 根据用户ID获取用户信息
+	// GetUser 根据用户 ID 获取用户信息
 	GetUser(ctx context.Context, userID string) (*model.UserM, error)
 }
 
-// AuthnMiddleware 是一个认证中间件，用于从 gin.Context 中提取 token 并验证 token 是否合法.
-// 只接受 Access Token (token_type="access").
+// AuthnMiddleware 是一个认证中间件，用于从 gin.Context 中提取 token 并验证 token 是否合法。
+// 只接受 Access Token（token_type="access"）。
 func AuthnMiddleware(retriever UserRetriever) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 解析 JWT Token
@@ -49,8 +49,8 @@ func AuthnMiddleware(retriever UserRetriever) gin.HandlerFunc {
 	}
 }
 
-// RefreshAuthnMiddleware 是一个专门用于刷新令牌的认证中间件.
-// 只接受 Refresh Token (token_type="refresh").
+// RefreshAuthnMiddleware 是一个专门用于刷新令牌的认证中间件。
+// 只接受 Refresh Token（token_type="refresh"）。
 func RefreshAuthnMiddleware(retriever UserRetriever) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从 Authorization header 获取 token

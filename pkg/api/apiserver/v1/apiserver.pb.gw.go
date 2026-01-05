@@ -2,9 +2,9 @@
 // source: apiserver/v1/apiserver.proto
 
 /*
-Package v1 is a reverse proxy.
+Package v1 是一个反向代理。
 
-It translates gRPC into RESTful JSON APIs.
+它将 gRPC 转换为 RESTful JSON API。
 */
 package v1
 
@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// Suppress "imported and not used" errors
+// 禁止"已导入但未使用"错误
 var (
 	_ codes.Code
 	_ io.Reader
@@ -296,11 +296,11 @@ func local_request_BlogService_ListUsers_0(ctx context.Context, marshaler runtim
 	return msg, metadata, err
 }
 
-// RegisterBlogServiceHandlerServer registers the http handlers for service BlogService to "mux".
-// UnaryRPC     :call BlogServiceServer directly.
-// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterBlogServiceHandlerFromEndpoint instead.
-// GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
+// RegisterBlogServiceHandlerServer 为 BlogService 服务注册 HTTP 处理器到 "mux"。
+// UnaryRPC     :直接调用 BlogServiceServer。
+// StreamingRPC :目前不支持，等待 https://github.com/grpc/grpc-go/issues/906 解决。
+// 注意，使用此注册选项将导致许多 gRPC 库功能停止工作。建议考虑使用 RegisterBlogServiceHandlerFromEndpoint 代替。
+// gRPC 拦截器对此类型的注册不起作用。要使用拦截器，必须在 "runtime.NewServeMux" 调用中使用 "runtime.WithMiddlewares" 选项。
 func RegisterBlogServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server BlogServiceServer) error {
 	mux.Handle(http.MethodGet, pattern_BlogService_Healthz_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -466,8 +466,8 @@ func RegisterBlogServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 	return nil
 }
 
-// RegisterBlogServiceHandlerFromEndpoint is same as RegisterBlogServiceHandler but
-// automatically dials to "endpoint" and closes the connection when "ctx" gets done.
+// RegisterBlogServiceHandlerFromEndpoint 与 RegisterBlogServiceHandler 相同，
+// 但会自动拨号到 "endpoint" 并在 "ctx" 完成时关闭连接。
 func RegisterBlogServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.NewClient(endpoint, opts...)
 	if err != nil {
@@ -490,17 +490,17 @@ func RegisterBlogServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.Se
 	return RegisterBlogServiceHandler(ctx, mux, conn)
 }
 
-// RegisterBlogServiceHandler registers the http handlers for service BlogService to "mux".
-// The handlers forward requests to the grpc endpoint over "conn".
+// RegisterBlogServiceHandler 为 BlogService 服务注册 HTTP 处理器到 "mux"。
+// 这些处理器将请求转发到 "conn" 上的 gRPC 端点。
 func RegisterBlogServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return RegisterBlogServiceHandlerClient(ctx, mux, NewBlogServiceClient(conn))
 }
 
-// RegisterBlogServiceHandlerClient registers the http handlers for service BlogService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "BlogServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "BlogServiceClient"
-// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "BlogServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
+// RegisterBlogServiceHandlerClient 为 BlogService 服务注册 HTTP 处理器
+// 到 "mux"。这些处理器将请求转发到给定 "BlogServiceClient" 实现的 gRPC 端点。
+// 注意：gRPC 框架在 gRPC 处理器内执行拦截器。如果传入的 "BlogServiceClient"
+// 没有通过正常的 gRPC 流程（创建 gRPC 客户端等），则需要由传入的
+// "BlogServiceClient" 调用正确的拦截器。此客户端会忽略 HTTP 中间件。
 func RegisterBlogServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client BlogServiceClient) error {
 	mux.Handle(http.MethodGet, pattern_BlogService_Healthz_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())

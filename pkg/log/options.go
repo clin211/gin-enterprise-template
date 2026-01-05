@@ -5,23 +5,23 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// Options contains configuration options for logging.
+// Options 包含日志的配置选项。
 type Options struct {
-	// DisableCaller specifies whether to include caller information in the log.
+	// DisableCaller 指定是否在日志中包含调用者信息。
 	DisableCaller bool `json:"disable-caller,omitempty" mapstructure:"disable-caller"`
-	// DisableStacktrace specifies whether to record a stack trace for all messages at or above panic level.
+	// DisableStacktrace 指定是否为 panic 级别及以上的所有消息记录堆栈跟踪。
 	DisableStacktrace bool `json:"disable-stacktrace,omitempty" mapstructure:"disable-stacktrace"`
-	// EnableColor specifies whether to output colored logs.
+	// EnableColor 指定是否输出彩色日志。
 	EnableColor bool `json:"enable-color"       mapstructure:"enable-color"`
-	// Level specifies the minimum log level. Valid values are: debug, info, warn, error, dpanic, panic, and fatal.
+	// Level 指定最小日志级别。有效值为：debug、info、warn、error、dpanic、panic 和 fatal。
 	Level string `json:"level,omitempty" mapstructure:"level"`
-	// Format specifies the log output format. Valid values are: console and json.
+	// Format 指定日志输出格式。有效值为：console 和 json。
 	Format string `json:"format,omitempty" mapstructure:"format"`
-	// OutputPaths specifies the output paths for the logs.
+	// OutputPaths 指定日志的输出路径。
 	OutputPaths []string `json:"output-paths,omitempty" mapstructure:"output-paths"`
 }
 
-// NewOptions creates a new Options object with default values.
+// NewOptions 创建一个带有默认值的新 Options 对象。
 func NewOptions() *Options {
 	return &Options{
 		Level:       zapcore.InfoLevel.String(),
@@ -30,20 +30,20 @@ func NewOptions() *Options {
 	}
 }
 
-// Validate verifies flags passed to LogsOptions.
+// Validate 验证传递给 LogsOptions 的标志。
 func (o *Options) Validate() []error {
 	errs := []error{}
 
 	return errs
 }
 
-// AddFlags adds command line flags for the configuration.
+// AddFlags 为配置添加命令行标志。
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&o.Level, "log.level", o.Level, "Minimum log output `LEVEL`.")
-	fs.BoolVar(&o.DisableCaller, "log.disable-caller", o.DisableCaller, "Disable output of caller information in the log.")
+	fs.StringVar(&o.Level, "log.level", o.Level, "最小日志输出 `LEVEL`。")
+	fs.BoolVar(&o.DisableCaller, "log.disable-caller", o.DisableCaller, "禁用日志中调用者信息的输出。")
 	fs.BoolVar(&o.DisableStacktrace, "log.disable-stacktrace", o.DisableStacktrace, ""+
-		"Disable the log to record a stack trace for all messages at or above panic level.")
-	fs.BoolVar(&o.EnableColor, "log.enable-color", o.EnableColor, "Enable output ansi colors in plain format logs.")
-	fs.StringVar(&o.Format, "log.format", o.Format, "Log output `FORMAT`, support plain or json format.")
-	fs.StringSliceVar(&o.OutputPaths, "log.output-paths", o.OutputPaths, "Output paths of log.")
+		"禁用日志为 panic 级别及以上的所有消息记录堆栈跟踪。")
+	fs.BoolVar(&o.EnableColor, "log.enable-color", o.EnableColor, "在纯文本格式日志中启用 ANSI 颜色输出。")
+	fs.StringVar(&o.Format, "log.format", o.Format, "日志输出 `FORMAT`，支持 plain 或 json 格式。")
+	fs.StringSliceVar(&o.OutputPaths, "log.output-paths", o.OutputPaths, "日志的输出路径。")
 }

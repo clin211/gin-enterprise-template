@@ -31,29 +31,29 @@ import (
 	"github.com/clin211/gin-enterprise-template/pkg/otelslog"
 )
 
-// Ensure interface
+// 确保接口实现
 var _ IOptions = (*OTelOptions)(nil)
 
-// OutputMode represents the output mode for OpenTelemetry data
+// OutputMode 表示 OpenTelemetry 数据的输出模式
 type OutputMode string
 
 const (
-	OutputModeOTLP    OutputMode = "otel"    // Send to OpenTelemetry Collector
-	OutputModeFile    OutputMode = "file"    // Output to files
-	OutputModeConsole OutputMode = "console" // Output to standard output
-	OutputModeClassic OutputMode = "classic" // Use traditional metrics + logging (no OTel)
+	OutputModeOTLP    OutputMode = "otel"    // 发送到 OpenTelemetry Collector
+	OutputModeFile    OutputMode = "file"    // 输出到文件
+	OutputModeConsole OutputMode = "console" // 输出到标准输出
+	OutputModeClassic OutputMode = "classic" // 使用传统指标 + 日志（无 OTel）
 
-	// Hybrid modes:
+	// 混合模式：
 	// log->stdout, metric->prometheus, trace->otel
 	OutputModeHybrid OutputMode = "hybrid"
 )
 
-// String implements the Stringer interface
+// String 实现 Stringer 接口
 func (o OutputMode) String() string {
 	return string(o)
 }
 
-// IsValid validates the output mode
+// IsValid 验证输出模式
 func (o OutputMode) IsValid() bool {
 	switch o {
 	case OutputModeConsole, OutputModeFile, OutputModeOTLP, OutputModeClassic, OutputModeHybrid:
@@ -63,7 +63,7 @@ func (o OutputMode) IsValid() bool {
 	}
 }
 
-// outputModeFlag implements pflag.Value interface for OutputMode
+// outputModeFlag 为 OutputMode 实现 pflag.Value 接口
 type outputModeFlag OutputMode
 
 func (f *outputModeFlag) String() string { return string(*f) }
@@ -77,45 +77,45 @@ func (f *outputModeFlag) Set(s string) error {
 	return nil
 }
 
-// Provider wraps OpenTelemetry providers with shutdown capability
+// Provider 包装具有关闭功能的 OpenTelemetry 提供程序
 type Provider interface {
 	Shutdown(context.Context) error
 }
 
-// OTelProviders holds all OpenTelemetry providers
+// OTelProviders 保存所有 OpenTelemetry 提供程序
 type OTelProviders struct {
 	tracer *trace.TracerProvider
 	meter  *metric.MeterProvider
 	logger *log.LoggerProvider
 }
 
-// OTelOptions OpenTelemetry configuration
+// OTelOptions OpenTelemetry 配置
 type OTelOptions struct {
-	// Connection settings
+	// 连接设置
 	Endpoint string `json:"endpoint,omitempty" mapstructure:"endpoint"`
 	Insecure bool   `json:"insecure,omitempty" mapstructure:"insecure"`
 
-	// Service identification
+	// 服务标识
 	ServiceName       string `json:"service-name,omitempty" mapstructure:"service-name"`
 	ServiceVersion    string `json:"service-version,omitempty" mapstructure:"service-version"`
 	ServiceInstanceID string `json:"service-instance-id,omitempty" mapstructure:"service-instance-id"`
 	Environment       string `json:"environment,omitempty" mapstructure:"environment"`
 
-	// Behavior settings
+	// 行为设置
 	SamplingRatio float64 `json:"sampling-ratio,omitempty" mapstructure:"sampling-ratio"`
 	WithResource  bool    `json:"with-resource,omitempty" mapstructure:"with-resource"`
 
-	// Output configuration
+	// 输出配置
 	OutputMode OutputMode `json:"output-mode,omitempty" mapstructure:"output-mode"`
 	OutputDir  string     `json:"output-dir,omitempty" mapstructure:"output-dir"`
 
-	// Logging configuration
+	// 日志配置
 	Level     string `json:"level,omitempty" mapstructure:"level"`
 	AddSource bool   `json:"add-source,omitempty" mapstructure:"add-source"`
 
 	Slog *SlogOptions `json:"slog,omitempty" mapstructure:"slog"`
 
-	// Internal state
+	// 内部状态
 	mu        sync.RWMutex
 	providers *OTelProviders
 	files     []io.Closer
@@ -127,7 +127,7 @@ var (
 	otelResource *resource.Resource
 )
 
-// NewOTelOptions creates a new OTelOptions with sensible defaults
+// NewOTelOptions 创建具有合理默认值的新 OTelOptions
 func NewOTelOptions() *OTelOptions {
 	hostname, _ := os.Hostname()
 	opts := &OTelOptions{
@@ -148,12 +148,12 @@ func NewOTelOptions() *OTelOptions {
 		files:             make([]io.Closer, 0),
 	}
 
-	// Sync slog options
+	// 同步 slog 选项
 	opts.syncSlogOptions()
 	return opts
 }
 
-// syncSlogOptions synchronizes slog options with main options
+// syncSlogOptions 将 slog 选项与主选项同步
 func (o *OTelOptions) syncSlogOptions() {
 	if o.Slog != nil {
 		o.Slog.Level = o.Level
@@ -161,24 +161,24 @@ func (o *OTelOptions) syncSlogOptions() {
 	}
 }
 
-// Validate validates the configuration
+// Validate 验证配置
 func (o *OTelOptions) Validate() []error {
 	var errs []error
 
-	// Sync slog options before validation
+	// 验证前同步 slog 选项
 	o.syncSlogOptions()
 
-	// Validate slog options
+	// 验证 slog 选项
 	if o.Slog != nil {
 		errs = append(errs, o.Slog.Validate()...)
 	}
 
-	// Validate output mode
+	// 验证输出模式
 	if !o.OutputMode.IsValid() {
 		errs = append(errs, fmt.Errorf("invalid output mode: %s", o.OutputMode))
 	}
 
-	// Validate required fields
+	// 验证必填字段
 	if o.ServiceName == "" {
 		errs = append(errs, fmt.Errorf("service name is required"))
 	}
@@ -186,17 +186,17 @@ func (o *OTelOptions) Validate() []error {
 		errs = append(errs, fmt.Errorf("service instance ID is required"))
 	}
 
-	// Validate OTLP specific settings
+	// 验证 OTLP 特定设置
 	if o.OutputMode == OutputModeOTLP && o.Endpoint == "" {
 		errs = append(errs, fmt.Errorf("endpoint is required for OTLP output mode"))
 	}
 
-	// Validate sampling ratio
+	// 验证采样率
 	if o.SamplingRatio < 0 || o.SamplingRatio > 1 {
 		errs = append(errs, fmt.Errorf("sampling ratio must be between 0 and 1, got: %f", o.SamplingRatio))
 	}
 
-	// Validate output directory for file mode
+	// 验证文件模式的输出目录
 	if o.OutputMode == OutputModeFile && o.OutputDir == "" {
 		errs = append(errs, fmt.Errorf("output directory is required for file output mode"))
 	}
@@ -204,7 +204,7 @@ func (o *OTelOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags adds command line flags
+// AddFlags 添加命令行标志
 func (o *OTelOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.ServiceName, fullPrefix+".service-name", o.ServiceName, "Service name")
 	fs.StringVar(&o.ServiceVersion, fullPrefix+".service-version", o.ServiceVersion, "Service version")
@@ -223,13 +223,13 @@ func (o *OTelOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	}
 }
 
-// GetResource creates or returns cached resource configuration
+// GetResource 创建或返回缓存的资源配置
 func (o *OTelOptions) GetResource() *resource.Resource {
 	resourceOnce.Do(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Base resource attributes
+		// 基本资源属性
 		attrs := []resource.Option{
 			resource.WithAttributes(
 				semconv.ServiceName(o.ServiceName),
@@ -239,7 +239,7 @@ func (o *OTelOptions) GetResource() *resource.Resource {
 			),
 		}
 
-		// Add system resource information if enabled
+		// 如果启用，添加系统资源信息
 		if o.WithResource {
 			attrs = append(attrs,
 				resource.WithOS(),
@@ -252,14 +252,14 @@ func (o *OTelOptions) GetResource() *resource.Resource {
 		var err error
 		otelResource, err = resource.New(ctx, attrs...)
 		if err != nil {
-			// Fallback to default resource
+			// 回退到默认资源
 			otelResource = resource.Default()
 		}
 	})
 	return otelResource
 }
 
-// createFileWriter creates and manages file writers
+// createFileWriter 创建并管理文件写入器
 func (o *OTelOptions) createFileWriter(name string) (io.Writer, error) {
 	if err := os.MkdirAll(o.OutputDir, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create output directory: %w", err)
@@ -275,7 +275,7 @@ func (o *OTelOptions) createFileWriter(name string) (io.Writer, error) {
 	return file, nil
 }
 
-// initTraces initializes tracing
+// initTraces 初始化追踪
 func (o *OTelOptions) initTraces(ctx context.Context) error {
 	var (
 		exporter trace.SpanExporter
@@ -323,7 +323,7 @@ func (o *OTelOptions) initTraces(ctx context.Context) error {
 	return nil
 }
 
-// initMetrics initializes metrics
+// initMetrics 初始化指标
 func (o *OTelOptions) initMetrics(ctx context.Context) error {
 	var (
 		reader   metric.Reader
@@ -368,7 +368,7 @@ func (o *OTelOptions) initMetrics(ctx context.Context) error {
 	return nil
 }
 
-// initLogs initializes logging
+// initLogs 初始化日志
 func (o *OTelOptions) initLogs(ctx context.Context) error {
 	var (
 		exporter log.Exporter
@@ -415,7 +415,7 @@ func (o *OTelOptions) initLogs(ctx context.Context) error {
 	o.providers.logger = lp
 	global.SetLoggerProvider(lp)
 
-	// Set up slog integration
+	// 设置 slog 集成
 	logger := otelslog.NewLogger(
 		o.ServiceName,
 		otelslog.WithLoggerProvider(global.GetLoggerProvider()),
@@ -427,18 +427,18 @@ func (o *OTelOptions) initLogs(ctx context.Context) error {
 	return nil
 }
 
-// Apply applies the configuration
+// Apply 应用配置
 func (o *OTelOptions) Apply() error {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	// Sync slog options
+	// 同步 slog 选项
 	o.syncSlogOptions()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// Initialize providers based on enabled signals
+	// 根据启用的信号初始化提供程序
 	if err := o.initTraces(ctx); err != nil {
 		return fmt.Errorf("failed to initialize traces: %w", err)
 	}
@@ -454,14 +454,14 @@ func (o *OTelOptions) Apply() error {
 	return nil
 }
 
-// Shutdown gracefully shuts down all providers
+// Shutdown 优雅地关闭所有提供程序
 func (o *OTelOptions) Shutdown(ctx context.Context) error {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
 	var errs []error
 
-	// Shutdown providers
+	// 关闭提供程序
 	if o.providers.tracer != nil {
 		if err := o.providers.tracer.Shutdown(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("tracer shutdown: %w", err))
@@ -480,13 +480,13 @@ func (o *OTelOptions) Shutdown(ctx context.Context) error {
 		}
 	}
 
-	// Close files
+	// 关闭文件
 	for _, file := range o.files {
 		if err := file.Close(); err != nil {
 			errs = append(errs, fmt.Errorf("file close: %w", err))
 		}
 	}
-	o.files = o.files[:0] // Clear slice
+	o.files = o.files[:0] // 清空切片
 
 	if len(errs) > 0 {
 		return fmt.Errorf("shutdown errors: %v", errs)
@@ -494,21 +494,21 @@ func (o *OTelOptions) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// GetTracerProvider returns the tracer provider
+// GetTracerProvider 返回 tracer provider
 func (o *OTelOptions) GetTracerProvider() *trace.TracerProvider {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 	return o.providers.tracer
 }
 
-// GetMeterProvider returns the meter provider
+// GetMeterProvider 返回 meter provider
 func (o *OTelOptions) GetMeterProvider() *metric.MeterProvider {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 	return o.providers.meter
 }
 
-// GetLoggerProvider returns the logger provider
+// GetLoggerProvider 返回 logger provider
 func (o *OTelOptions) GetLoggerProvider() *log.LoggerProvider {
 	o.mu.RLock()
 	defer o.mu.RUnlock()

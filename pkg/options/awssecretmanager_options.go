@@ -7,21 +7,20 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// Ensure interface
+// 确保接口实现
 var _ IOptions = (*AWSSecretManagerOptions)(nil)
 
-// AWSSecretManagerOptions contains minimal configuration to read a secret
-// from AWS Secrets Manager.
+// AWSSecretManagerOptions 包含从 AWS Secrets Manager 读取密钥的最低配置。
 type AWSSecretManagerOptions struct {
-	// Region is the AWS region where the secret resides, e.g. "ap-southeast-1".
+	// Region 是密钥所在的 AWS 区域，例如 "ap-southeast-1"。
 	Region string `json:"region" mapstructure:"region"`
 
-	// SecretName is the identifier of the secret in AWS Secrets Manager,
-	// e.g. "sre-redis-platform/-/ro".
+	// SecretName 是 AWS Secrets Manager 中密钥的标识符，
+	// 例如 "sre-redis-platform/-/ro"。
 	SecretName string `json:"secret-name" mapstructure:"secret-name"`
 }
 
-// NewAWSSecretManagerOptions creates an options instance with sensible defaults.
+// NewAWSSecretManagerOptions 创建具有合理默认值的选项实例。
 func NewAWSSecretManagerOptions() *AWSSecretManagerOptions {
 	return &AWSSecretManagerOptions{
 		Region:     "ap-southeast-1",
@@ -29,7 +28,7 @@ func NewAWSSecretManagerOptions() *AWSSecretManagerOptions {
 	}
 }
 
-// Validate checks required fields and basic constraints.
+// Validate 检查必填字段和基本约束。
 func (o *AWSSecretManagerOptions) Validate() []error {
 	if o == nil {
 		return nil
@@ -39,10 +38,10 @@ func (o *AWSSecretManagerOptions) Validate() []error {
 	if o.Region == "" {
 		errs = append(errs, fmt.Errorf("awssm.region is required"))
 	} else {
-		// loose sanity check, accepts standard patterns like us-east-1, ap-southeast-1, eu-west-3
+		// 宽松的健康检查，接受标准模式如 us-east-1, ap-southeast-1, eu-west-3
 		re := regexp.MustCompile(`^[a-z]{2}-[a-z]+-\d$`)
 		if !re.MatchString(o.Region) {
-			// don't block non-standard partitions; just warn via error text
+			// 不阻止非标准分区；仅通过错误文本警告
 			errs = append(errs, fmt.Errorf("awssm.region %q looks unusual; expected like 'ap-southeast-1' or 'us-east-1'", o.Region))
 		}
 	}
@@ -54,8 +53,8 @@ func (o *AWSSecretManagerOptions) Validate() []error {
 	return errs
 }
 
-// AddFlags registers AWS Secrets Manager related flags to the specified FlagSet,
-// using fullPrefix as the complete prefix for flag names.
+// AddFlags 将 AWS Secrets Manager 相关标志注册到指定的 FlagSet，
+// 使用 fullPrefix 作为标志名称的完整前缀。
 func (o *AWSSecretManagerOptions) AddFlags(fs *pflag.FlagSet, fullPrefix string) {
 	fs.StringVar(&o.Region, fullPrefix+".region", o.Region,
 		"AWS region where the secret resides, e.g. ap-southeast-1.")

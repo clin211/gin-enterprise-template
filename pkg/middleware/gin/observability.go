@@ -13,67 +13,67 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Standard trace header keys
+// 标准追踪头常量
 const (
-	// W3C Trace Context standard (most recommended)
+	// W3C 追踪上下文标准（最推荐）
 	TraceParentHeaderKey = "traceparent"
 
-	// Simple trace ID (most widely used)
+	// 简单追踪 ID（最广泛使用）
 	TraceIDHeaderKey = "X-Trace-Id"
 
-	// Generic request ID (universal compatibility)
+	// 通用请求 ID（通用兼容）
 	RequestIDHeaderKey = "X-Request-Id"
 
-	// Tracestate for additional context
+	// 用于额外上下文的追踪状态
 	TraceStateHeaderKey = "tracestate"
 )
 
-// TraceInjectionMode defines how trace information is injected
+// TraceInjectionMode 定义追踪信息的注入方式
 type TraceInjectionMode int
 
 const (
-	// InjectW3CTraceContext injects full W3C trace context (recommended)
+	// InjectW3CTraceContext 注入完整的 W3C 追踪上下文（推荐）
 	InjectW3CTraceContext TraceInjectionMode = iota
-	// InjectTraceIDOnly injects only trace ID
+	// InjectTraceIDOnly 仅注入追踪 ID
 	InjectTraceIDOnly
-	// InjectBoth injects both W3C format and simple trace ID
+	// InjectBoth 同时注入 W3C 格式和简单追踪 ID
 	InjectBoth
-	// InjectNone disables trace injection
+	// InjectNone 禁用追踪注入
 	InjectNone
 )
 
-// ObservabilityOptions holds configuration for trace injection
+// ObservabilityOptions 保存追踪注入的配置
 type ObservabilityOptions struct {
 	TraceInjectionMode TraceInjectionMode
-	CustomTraceHeader  string   // Custom header name for trace ID
-	SkipPaths          []string // Paths to skip logging (supports wildcards)
+	CustomTraceHeader  string   // 追踪 ID 的自定义头名称
+	SkipPaths          []string // 跳过日志记录的路径（支持通配符）
 }
 
-// Option is a functional option for configuring the middleware
+// Option 是用于配置中间件的函数式选项
 type Option func(*ObservabilityOptions)
 
-// WithTraceInjection configures trace injection mode
+// WithTraceInjection 配置追踪注入模式
 func WithTraceInjection(mode TraceInjectionMode) Option {
 	return func(o *ObservabilityOptions) {
 		o.TraceInjectionMode = mode
 	}
 }
 
-// WithCustomTraceHeader sets a custom header name for trace ID
+// WithCustomTraceHeader 设置追踪 ID 的自定义头名称
 func WithCustomTraceHeader(headerName string) Option {
 	return func(o *ObservabilityOptions) {
 		o.CustomTraceHeader = headerName
 	}
 }
 
-// WithSkipPaths configures paths to skip (supports exact match and wildcards)
+// WithSkipPaths 配置要跳过的路径（支持精确匹配和通配符）
 func WithSkipPaths(paths ...string) Option {
 	return func(o *ObservabilityOptions) {
 		o.SkipPaths = append(o.SkipPaths, paths...)
 	}
 }
 
-// WithSkipMetrics is a convenience function to skip common metrics endpoints
+// WithSkipMetrics 是跳过常见指标端点的便捷函数
 func WithSkipMetrics() Option {
 	return func(o *ObservabilityOptions) {
 		commonPaths := []string{
@@ -97,15 +97,15 @@ func WithSkipMetrics() Option {
 	}
 }
 
-// Observability middleware with configurable trace injection
+// Observability 中间件，支持可配置的追踪注入
 func Observability(opts ...Option) gin.HandlerFunc {
-	// Default configuration
+	// 默认配置
 	config := &ObservabilityOptions{
 		TraceInjectionMode: InjectTraceIDOnly,
-		SkipPaths:          []string{"/metrics"}, // Default skip /metrics
+		SkipPaths:          []string{"/metrics"}, // 默认跳过 /metrics
 	}
 
-	// Apply options
+	// 应用选项
 	for _, opt := range opts {
 		opt(config)
 	}
@@ -114,24 +114,24 @@ func Observability(opts ...Option) gin.HandlerFunc {
 		start := time.Now()
 		ctx := c.Request.Context()
 
-		// Check if this request should be skipped
+		// 检查此请求是否应该被跳过
 		shouldSkip := shouldSkipPath(c.Request.URL.Path, c.Request.Method, config.SkipPaths)
 		if shouldSkip {
 			c.Next()
 			return
 		}
 
-		// Extract trace information early
+		// 尽早提取追踪信息
 		span := trace.SpanFromContext(ctx)
 		spanCtx := span.SpanContext()
 
-		// Inject trace headers based on configuration (unless skipping tracing)
+		// 根据配置注入追踪头（除非跳过追踪）
 		injectTraceHeaders(c, spanCtx, config)
 
 		var requestBody string
 		var responseBuffer bytes.Buffer
 
-		// Only capture body if we're going to log and debug is enabled
+		// 仅在需要记录日志且启用调试时捕获请求体
 		isDebugLevel := isDebugEnabled()
 
 		if isDebugLevel && c.Request.Body != nil {
@@ -149,7 +149,7 @@ func Observability(opts ...Option) gin.HandlerFunc {
 
 		duration := time.Since(start).Seconds()
 
-		// Build structured log
+		// 构建结构化日志
 		httpData := map[string]any{
 			"request": map[string]any{
 				"method": c.Request.Method,
@@ -188,7 +188,7 @@ func Observability(opts ...Option) gin.HandlerFunc {
 	}
 }
 
-// shouldSkipPath checks if a path should be skipped based on configuration
+// shouldSkipPath 根据配置检查路径是否应该被跳过
 func shouldSkipPath(path, method string, skipPaths []string) bool {
 	for _, skipPath := range skipPaths {
 		if matchPath(path, method, skipPath) {
@@ -198,9 +198,9 @@ func shouldSkipPath(path, method string, skipPaths []string) bool {
 	return false
 }
 
-// matchPath matches a request path against a skip pattern
+// matchPath 将请求路径与跳过模式进行匹配
 func matchPath(requestPath, method, pattern string) bool {
-	// Handle method-specific patterns like "GET /metrics"
+	// 处理特定方法的模式，如 "GET /metrics"
 	if strings.Contains(pattern, " ") {
 		parts := strings.SplitN(pattern, " ", 2)
 		if len(parts) == 2 {
@@ -214,23 +214,23 @@ func matchPath(requestPath, method, pattern string) bool {
 		}
 	}
 
-	// Handle path-only patterns
+	// 处理仅路径的模式
 	return matchPathPattern(requestPath, pattern)
 }
 
-// matchPathPattern matches a path against a pattern (supports wildcards)
+// matchPathPattern 将路径与模式进行匹配（支持通配符）
 func matchPathPattern(path, pattern string) bool {
-	// Exact match
+	// 精确匹配
 	if path == pattern {
 		return true
 	}
 
-	// Wildcard support
+	// 通配符支持
 	if strings.Contains(pattern, "*") {
 		return matchWildcard(path, pattern)
 	}
 
-	// Prefix match (if pattern ends with /)
+	// 前缀匹配（如果模式以 / 结尾）
 	if strings.HasSuffix(pattern, "/") {
 		return strings.HasPrefix(path, pattern)
 	}
@@ -238,13 +238,13 @@ func matchPathPattern(path, pattern string) bool {
 	return false
 }
 
-// matchWildcard performs simple wildcard matching
+// matchWildcard 执行简单的通配符匹配
 func matchWildcard(text, pattern string) bool {
 	if pattern == "*" {
 		return true
 	}
 
-	// Simple prefix/suffix wildcard matching
+	// 简单的前缀/后缀通配符匹配
 	if strings.HasPrefix(pattern, "*") && strings.HasSuffix(pattern, "*") {
 		substr := pattern[1 : len(pattern)-1]
 		return strings.Contains(text, substr)
@@ -263,7 +263,7 @@ func matchWildcard(text, pattern string) bool {
 	return text == pattern
 }
 
-// injectTraceHeaders injects trace headers based on configuration
+// injectTraceHeaders 根据配置注入追踪头
 func injectTraceHeaders(c *gin.Context, spanCtx trace.SpanContext, config *ObservabilityOptions) {
 	if !spanCtx.IsValid() {
 		return
@@ -274,10 +274,10 @@ func injectTraceHeaders(c *gin.Context, spanCtx trace.SpanContext, config *Obser
 
 	switch config.TraceInjectionMode {
 	case InjectW3CTraceContext:
-		// W3C Trace Context format: version-trace_id-parent_id-trace_flags
-		traceFlags := "01" // sampled
+		// W3C 追踪上下文格式：version-trace_id-parent_id-trace_flags
+		traceFlags := "01" // 已采样
 		if !spanCtx.IsSampled() {
-			traceFlags = "00" // not sampled
+			traceFlags = "00" // 未采样
 		}
 		traceparent := fmt.Sprintf("00-%s-%s-%s", traceID, spanID, traceFlags)
 		c.Header(TraceParentHeaderKey, traceparent)
@@ -290,7 +290,7 @@ func injectTraceHeaders(c *gin.Context, spanCtx trace.SpanContext, config *Obser
 		c.Header(headerKey, traceID)
 
 	case InjectBoth:
-		// W3C format
+		// W3C 格式
 		traceFlags := "01"
 		if !spanCtx.IsSampled() {
 			traceFlags = "00"
@@ -298,7 +298,7 @@ func injectTraceHeaders(c *gin.Context, spanCtx trace.SpanContext, config *Obser
 		traceparent := fmt.Sprintf("00-%s-%s-%s", traceID, spanID, traceFlags)
 		c.Header(TraceParentHeaderKey, traceparent)
 
-		// Simple trace ID
+		// 简单追踪 ID
 		headerKey := TraceIDHeaderKey
 		if config.CustomTraceHeader != "" {
 			headerKey = config.CustomTraceHeader
@@ -306,23 +306,23 @@ func injectTraceHeaders(c *gin.Context, spanCtx trace.SpanContext, config *Obser
 		c.Header(headerKey, traceID)
 
 	case InjectNone:
-		// Do nothing
+		// 不执行任何操作
 	}
 }
 
-// Convenience functions for common configurations
+// 常见配置的便捷函数
 
-// ObservabilityWithW3CTraceContext creates middleware with W3C trace context
+// ObservabilityWithW3CTraceContext 创建带 W3C 追踪上下文的中间件
 func ObservabilityWithW3CTraceContext() gin.HandlerFunc {
 	return Observability(WithTraceInjection(InjectW3CTraceContext))
 }
 
-// ObservabilityWithTraceID creates middleware with simple trace ID
+// ObservabilityWithTraceID 创建带简单追踪 ID 的中间件
 func ObservabilityWithTraceID() gin.HandlerFunc {
 	return Observability(WithTraceInjection(InjectTraceIDOnly))
 }
 
-// ObservabilityWithCustomHeader creates middleware with custom header
+// ObservabilityWithCustomHeader 创建带自定义头的中间件
 func ObservabilityWithCustomHeader(headerName string) gin.HandlerFunc {
 	return Observability(
 		WithTraceInjection(InjectTraceIDOnly),
@@ -330,17 +330,17 @@ func ObservabilityWithCustomHeader(headerName string) gin.HandlerFunc {
 	)
 }
 
-// ObservabilitySkipMetrics creates middleware that skips common metrics endpoints
+// ObservabilitySkipMetrics 创建跳过常见指标端点的中间件
 func ObservabilitySkipMetrics() gin.HandlerFunc {
 	return Observability(WithSkipMetrics())
 }
 
-// ObservabilityWithSkipPaths creates middleware with custom skip paths
+// ObservabilityWithSkipPaths 创建带自定义跳过路径的中间件
 func ObservabilityWithSkipPaths(paths ...string) gin.HandlerFunc {
 	return Observability(WithSkipPaths(paths...))
 }
 
-// bodyCaptureWriter captures and duplicates written response body
+// bodyCaptureWriter 捕获并复制写入的响应体
 type bodyCaptureWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
@@ -351,7 +351,7 @@ func (w *bodyCaptureWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-// isDebugEnabled checks if debug logging is enabled for the global logger
+// isDebugEnabled 检查是否为全局日志记录器启用了调试日志
 func isDebugEnabled() bool {
 	return slog.Default().Enabled(context.Background(), slog.LevelDebug)
 }

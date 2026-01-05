@@ -15,21 +15,21 @@ type Server interface {
 	GracefulStop(ctx context.Context)
 }
 
-// Serve starts the server and blocks until the context is canceled.
-// It ensures the server is gracefully shut down when the context is done.
+// Serve 启动服务器并阻塞，直到上下文被取消。
+// 它确保在上下文完成时服务器被优雅关闭。
 func Serve(ctx context.Context, srv Server) error {
 	go srv.RunOrDie()
 
-	// Block until the context is canceled or terminated.
+	// 阻塞直到上下文被取消或终止。
 	<-ctx.Done()
 
-	// Shutdown the server gracefully.
+	// 优雅关闭服务器。
 	slog.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Gracefully stop the server.
+	// 优雅停止服务器。
 	srv.GracefulStop(ctx)
 
 	slog.Info("Server exited successfully.")

@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 )
 
-// tokenInfo contains token information.
+// tokenInfo 包含令牌信息。
 type tokenInfo struct {
-	// Token string.
+	// 令牌字符串。
 	Token string `json:"token"`
 
-	// Token type.
+	// 令牌类型。
 	Type string `json:"type"`
 
-	// Token expiration time
+	// 令牌过期时间。
 	ExpiresAt int64 `json:"expiresAt"`
 }
 

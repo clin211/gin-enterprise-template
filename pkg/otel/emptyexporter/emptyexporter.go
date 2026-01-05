@@ -13,18 +13,18 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-// FakeExporter implements sdktrace.SpanExporter but discards or logs spans.
-// You can pass a custom handler to inspect spans in tests.
+// FakeExporter 实现了 sdktrace.SpanExporter，但会丢弃或记录 span。
+// 您可以传入自定义处理程序在测试中检查 span。
 type FakeExporter struct {
-	LogSpans bool                                                  // if true, print spans to stdout
-	Handle   func(ctx context.Context, span sdktrace.ReadOnlySpan) // optional span handler
+	LogSpans bool                                                  // 如果为 true，则将 span 打印到 stdout
+	Handle   func(ctx context.Context, span sdktrace.ReadOnlySpan) // 可选的 span 处理程序
 }
 
-// Ensure FakeExporter implements sdktrace.SpanExporter.
+// 确保 FakeExporter 实现了 sdktrace.SpanExporter。
 var _ sdktrace.SpanExporter = (*FakeExporter)(nil)
 
-// ExportSpans is called by the SDK when spans are finished.
-// In this fake exporter, we either log them or discard them.
+// ExportSpans 在 span 完成时由 SDK 调用。
+// 在这个伪造的导出器中，我们要么记录它们，要么丢弃它们。
 func (f *FakeExporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnlySpan) error {
 	for _, span := range spans {
 		if f.Handle != nil {
@@ -43,7 +43,7 @@ func (f *FakeExporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnl
 	return nil
 }
 
-// Shutdown is called when the provider or process exits.
+// Shutdown 在提供者或进程退出时被调用。
 func (f *FakeExporter) Shutdown(ctx context.Context) error {
 	if f.LogSpans {
 		log.Println("[FAKE EXPORTER] shutting down")
@@ -51,8 +51,8 @@ func (f *FakeExporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// InitFakeTracer configures OpenTelemetry to use a fake tracer provider.
-// It creates valid TraceIDs/SpanIDs, keeps propagation functional, but doesn't export spans elsewhere.
+// InitFakeTracer 配置 OpenTelemetry 使用伪造的 tracer provider。
+// 它创建有效的 TraceID/SpanID，保持传播功能正常，但不会将 span 导出到其他地方。
 func InitFakeTracer(serviceName string, logSpans bool) {
 	exporter := &FakeExporter{LogSpans: logSpans}
 

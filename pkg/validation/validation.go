@@ -9,24 +9,24 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// Validator implements the validate.IValidator interface.
+// Validator 实现了 validate.IValidator 接口。
 type Validator struct {
 	registry map[string]reflect.Value
 }
 
-// ProviderSet is the validator providers.
+// ProviderSet 是验证器的提供者。
 //var ProviderSet = wire.NewSet(NewValidator)
 
-// NewValidator creates and initializes a custom validator.
+// NewValidator 创建并初始化一个自定义验证器。
 func NewValidator(customValidator any) *Validator {
 	return &Validator{registry: extractValidationMethods(customValidator)}
 }
 
-// Validate validates the request using the appropriate validation method.
+// Validate 使用适当的验证方法验证请求。
 func (v *Validator) Validate(ctx context.Context, request any) error {
 	validationFunc, ok := v.registry[reflect.TypeOf(request).Elem().Name()]
 	if !ok {
-		return nil // No validation function found for the request type
+		return nil // 未找到该请求类型的验证函数
 	}
 
 	result := validationFunc.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(request)})
@@ -37,8 +37,7 @@ func (v *Validator) Validate(ctx context.Context, request any) error {
 	return nil
 }
 
-// extractValidationMethods extracts and returns a map of validation functions
-// from the provided custom validator.
+// extractValidationMethods 从提供的自定义验证器中提取并返回验证函数映射。
 func extractValidationMethods(customValidator any) map[string]reflect.Value {
 	funcs := make(map[string]reflect.Value)
 	validatorType := reflect.TypeOf(customValidator)
@@ -54,20 +53,20 @@ func extractValidationMethods(customValidator any) map[string]reflect.Value {
 
 		methodType := methodValue.Type()
 
-		// Ensure the method takes a context.Context and a pointer
+		// 确保方法接受 context.Context 和一个指针
 		if methodType.NumIn() != 2 || methodType.NumOut() != 1 ||
 			methodType.In(0) != reflect.TypeOf((*context.Context)(nil)).Elem() ||
 			methodType.In(1).Kind() != reflect.Pointer {
 			continue
 		}
 
-		// Ensure the method name matches the expected naming convention
+		// 确保方法名称符合预期的命名约定
 		requestTypeName := methodType.In(1).Elem().Name()
 		if method.Name != ("Validate" + requestTypeName) {
 			continue
 		}
 
-		// Ensure the return type is error
+		// 确保返回类型是 error
 		if methodType.Out(0) != reflect.TypeOf((*error)(nil)).Elem() {
 			continue
 		}
