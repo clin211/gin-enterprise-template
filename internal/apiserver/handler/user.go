@@ -15,7 +15,13 @@ func init() {
 		rg.PUT(":userID", handler.UpdateUser)                     // 更新用户信息
 		rg.DELETE(":userID", handler.DeleteUser)                  // 删除用户
 		rg.GET(":userID", handler.GetUser)                        // 查询用户详情
-		rg.GET("", handler.ListUser)                              // 查询用户列表.
+		rg.GET("", handler.ListUser)                              // 查询用户列表
+		rg.GET("/menu-tree", handler.GetUserMenuTree)             // 获取用户可见的菜单树
+
+		// 用户角色相关路由
+		rg.POST(":userID/roles", handler.AssignRolesToUser)       // 为用户分配角色
+		rg.GET(":userID/roles", handler.GetUserRoles)             // 获取用户的角色和权限
+		rg.DELETE(":userID/roles/:roleID", handler.RemoveRoleFromUser) // 从用户移除角色
 	})
 }
 
@@ -58,4 +64,9 @@ func (h *Handler) GetUser(c *gin.Context) {
 // ListUser 列出用户信息.
 func (h *Handler) ListUser(c *gin.Context) {
 	core.HandleQueryRequest(c, h.biz.UserV1().List, h.val.ValidateListUserRequest)
+}
+
+// GetUserMenuTree 获取用户可见的菜单树.
+func (h *Handler) GetUserMenuTree(c *gin.Context) {
+	core.HandleQueryRequest(c, h.biz.MenuV1().GetUserMenuTree, h.val.ValidateGetUserMenuTreeRequest)
 }

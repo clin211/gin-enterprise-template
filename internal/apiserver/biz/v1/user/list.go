@@ -32,14 +32,7 @@ func (b *userBiz) List(ctx context.Context, rq *v1.ListUserRequest) (*v1.ListUse
 	}
 
 	// 构建 where.Options，使用游标分页
-	pageSize := int(rq.GetPageSize())
-	if pageSize <= 0 {
-		pageSize = 20 // 默认每页 20 条
-	}
-	// 限制最大 page_size 防止请求过多数据
-	if pageSize > 100 {
-		pageSize = 100
-	}
+	pageSize := pagination.NormalizePageSize(rq.GetPageSize())
 
 	whr := where.NewWhere(where.WithLimit(int64(pageSize)))
 	if cursor != nil {
@@ -96,8 +89,9 @@ func (b *userBiz) List(ctx context.Context, rq *v1.ListUserRequest) (*v1.ListUse
 	}
 
 	// 生成下一页的 page_token
+	// 只有当返回的数据量等于 pageSize 时，才说明可能有下一页
 	var nextPageToken string
-	if len(userList) > 0 {
+	if len(userList) == pageSize {
 		lastUser := userList[len(userList)-1]
 		cursor, err := pagination.NewCursor("id", lastUser.ID)
 		if err == nil {

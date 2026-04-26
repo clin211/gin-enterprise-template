@@ -29,6 +29,11 @@ type IStore interface {
 	// TX 用于在 Biz 层实现事务。
 	TX(ctx context.Context, fn func(ctx context.Context) error) error
 	User() UserStore
+	// RBAC 相关
+	Role() RoleStore
+	Permission() PermissionStore
+	Menu() MenuStore
+	UserRole() UserRoleStore
 }
 
 // transactionKey 是用于在 context.Context 中存储事务上下文的键。
@@ -91,4 +96,24 @@ func (store *datastore) TX(ctx context.Context, fn func(ctx context.Context) err
 // User 返回一个实现了 UserStore 接口的实例.
 func (store *datastore) User() UserStore {
 	return newUserStore(store)
+}
+
+// Role 返回一个实现了 RoleStore 接口的实例.
+func (store *datastore) Role() RoleStore {
+	return newRoleStore(store)
+}
+
+// Permission 返回一个实现了 PermissionStore 接口的实例.
+func (store *datastore) Permission() PermissionStore {
+	return newPermissionStore(store)
+}
+
+// Menu 返回一个实现了 MenuStore 接口的实例.
+func (store *datastore) Menu() MenuStore {
+	return newMenuStore(store)
+}
+
+// UserRole 返回一个实现了 UserRoleStore 接口的实例.
+func (store *datastore) UserRole() UserRoleStore {
+	return newUserRoleStore(store)
 }

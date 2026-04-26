@@ -11,6 +11,10 @@ import "google/protobuf/empty.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "apiserver/v1/healthz.proto";
 import "apiserver/v1/user.proto";
+import "apiserver/v1/menu.proto";
+import "apiserver/v1/permission.proto";
+import "apiserver/v1/role.proto";
+import "apiserver/v1/user_role.proto";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
@@ -50,7 +54,7 @@ service BlogService {
     // 用户登录
     rpc Login(LoginRequest) returns (LoginResponse) {
         option (google.api.http) = {
-            post: "/login"
+            post: "/v1/auth/login"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -62,7 +66,7 @@ service BlogService {
     // 刷新令牌
     rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
         option (google.api.http) = {
-            put: "/refresh-token"
+            put: "/v1/auth/refresh-token"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -125,6 +129,275 @@ service BlogService {
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             summary: "列表用户";
             description: "获取所有用户的列表";
+            tags: "用户管理";
+        };
+    }
+
+    // ========== 菜单管理 ==========
+    // 创建菜单
+    rpc CreateMenu(CreateMenuRequest) returns (CreateMenuResponse) {
+        option (google.api.http) = {
+            post: "/v1/menus"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "创建菜单";
+            description: "创建一个新的菜单";
+            tags: "菜单管理";
+        };
+    }
+    // 获取菜单
+    rpc GetMenu(GetMenuRequest) returns (GetMenuResponse) {
+        option (google.api.http) = {
+            get: "/v1/menus/{menuID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "获取菜单";
+            description: "根据菜单 ID 获取菜单信息";
+            tags: "菜单管理";
+        };
+    }
+    // 更新菜单
+    rpc UpdateMenu(UpdateMenuRequest) returns (UpdateMenuResponse) {
+        option (google.api.http) = {
+            put: "/v1/menus/{menuID}"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "更新菜单";
+            description: "根据菜单 ID 更新菜单信息";
+            tags: "菜单管理";
+        };
+    }
+    // 删除菜单
+    rpc DeleteMenu(DeleteMenuRequest) returns (DeleteMenuResponse) {
+        option (google.api.http) = {
+            delete: "/v1/menus/{menuID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "删除菜单";
+            description: "根据菜单 ID 删除菜单";
+            tags: "菜单管理";
+        };
+    }
+    // 列表菜单
+    rpc ListMenus(ListMenuRequest) returns (ListMenuResponse) {
+        option (google.api.http) = {
+            get: "/v1/menus"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "列表菜单";
+            description: "获取菜单列表";
+            tags: "菜单管理";
+        };
+    }
+    // 列表菜单树
+    rpc ListMenuTree(ListMenuTreeRequest) returns (ListMenuTreeResponse) {
+        option (google.api.http) = {
+            get: "/v1/menus/tree"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "列表菜单树";
+            description: "获取菜单树结构";
+            tags: "菜单管理";
+        };
+    }
+    // 获取用户菜单树
+    rpc GetUserMenuTree(GetUserMenuTreeRequest) returns (GetUserMenuTreeResponse) {
+        option (google.api.http) = {
+            get: "/v1/users/menu-tree"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "获取用户菜单树";
+            description: "获取当前用户的菜单树";
+            tags: "菜单管理";
+        };
+    }
+
+    // ========== 权限管理 ==========
+    // 创建权限
+    rpc CreatePermission(CreatePermissionRequest) returns (CreatePermissionResponse) {
+        option (google.api.http) = {
+            post: "/v1/permissions"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "创建权限";
+            description: "创建一个新的权限";
+            tags: "权限管理";
+        };
+    }
+    // 获取权限
+    rpc GetPermission(GetPermissionRequest) returns (GetPermissionResponse) {
+        option (google.api.http) = {
+            get: "/v1/permissions/{permissionID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "获取权限";
+            description: "根据权限 ID 获取权限信息";
+            tags: "权限管理";
+        };
+    }
+    // 更新权限
+    rpc UpdatePermission(UpdatePermissionRequest) returns (UpdatePermissionResponse) {
+        option (google.api.http) = {
+            put: "/v1/permissions/{permissionID}"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "更新权限";
+            description: "根据权限 ID 更新权限信息";
+            tags: "权限管理";
+        };
+    }
+    // 删除权限
+    rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse) {
+        option (google.api.http) = {
+            delete: "/v1/permissions/{permissionID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "删除权限";
+            description: "根据权限 ID 删除权限";
+            tags: "权限管理";
+        };
+    }
+    // 列表权限
+    rpc ListPermissions(ListPermissionRequest) returns (ListPermissionResponse) {
+        option (google.api.http) = {
+            get: "/v1/permissions"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "列表权限";
+            description: "获取权限列表";
+            tags: "权限管理";
+        };
+    }
+    // 列表权限树
+    rpc ListPermissionTree(ListPermissionTreeRequest) returns (ListPermissionTreeResponse) {
+        option (google.api.http) = {
+            get: "/v1/permissions/tree"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "列表权限树";
+            description: "获取权限树结构";
+            tags: "权限管理";
+        };
+    }
+
+    // ========== 角色管理 ==========
+    // 创建角色
+    rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse) {
+        option (google.api.http) = {
+            post: "/v1/roles"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "创建角色";
+            description: "创建一个新的角色";
+            tags: "角色管理";
+        };
+    }
+    // 获取角色
+    rpc GetRole(GetRoleRequest) returns (GetRoleResponse) {
+        option (google.api.http) = {
+            get: "/v1/roles/{roleID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "获取角色";
+            description: "根据角色 ID 获取角色信息";
+            tags: "角色管理";
+        };
+    }
+    // 更新角色
+    rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {
+        option (google.api.http) = {
+            put: "/v1/roles/{roleID}"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "更新角色";
+            description: "根据角色 ID 更新角色信息";
+            tags: "角色管理";
+        };
+    }
+    // 删除角色
+    rpc DeleteRole(DeleteRoleRequest) returns (DeleteRoleResponse) {
+        option (google.api.http) = {
+            delete: "/v1/roles/{roleID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "删除角色";
+            description: "根据角色 ID 删除角色";
+            tags: "角色管理";
+        };
+    }
+    // 列表角色
+    rpc ListRoles(ListRoleRequest) returns (ListRoleResponse) {
+        option (google.api.http) = {
+            get: "/v1/roles"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "列表角色";
+            description: "获取角色列表";
+            tags: "角色管理";
+        };
+    }
+    // 给角色分配权限
+    rpc AssignPermissionsToRole(AssignPermissionsToRoleRequest) returns (AssignPermissionsToRoleResponse) {
+        option (google.api.http) = {
+            post: "/v1/roles/{roleID}/permissions"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "给角色分配权限";
+            description: "为角色分配或更新权限";
+            tags: "角色管理";
+        };
+    }
+    // 获取角色权限
+    rpc GetRolePermissions(GetRolePermissionsRequest) returns (GetRolePermissionsResponse) {
+        option (google.api.http) = {
+            get: "/v1/roles/{roleID}/permissions"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "获取角色权限";
+            description: "获取角色的权限列表";
+            tags: "角色管理";
+        };
+    }
+
+    // ========== 用户角色管理 ==========
+    // 给用户分配角色
+    rpc AssignRolesToUser(AssignRolesToUserRequest) returns (AssignRolesToUserResponse) {
+        option (google.api.http) = {
+            post: "/v1/users/{userID}/roles"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "给用户分配角色";
+            description: "为用户分配角色";
+            tags: "用户管理";
+        };
+    }
+    // 获取用户角色
+    rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse) {
+        option (google.api.http) = {
+            get: "/v1/users/{userID}/roles"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "获取用户角色";
+            description: "获取用户的角色列表和权限";
+            tags: "用户管理";
+        };
+    }
+    // 从用户移除角色
+    rpc RemoveRoleFromUser(RemoveRoleFromUserRequest) returns (RemoveRoleFromUserResponse) {
+        option (google.api.http) = {
+            delete: "/v1/users/{userID}/roles/{roleID}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "从用户移除角色";
+            description: "从用户移除指定角色";
             tags: "用户管理";
         };
     }
