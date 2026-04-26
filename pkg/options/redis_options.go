@@ -1,6 +1,7 @@
 package options
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/extra/rediscensus/v9"
@@ -56,6 +57,15 @@ func (o *RedisOptions) Validate() []error {
 
 	if o.PoolTimeout == 0 {
 		o.PoolTimeout = o.ReadTimeout + 1*time.Second
+	}
+
+	// 仅在 Addr 配置了的情况下校验密码——这样不使用 Redis 的服务无须配置密码。
+	// 空密码（开发场景）允许通过；只拒绝明显的占位符。
+	if o.Addr != "" && o.Password != "" && IsPlaceholderSecret(o.Password) {
+		errs = append(errs, fmt.Errorf(
+			"redis.password looks like a placeholder/known-weak value (%q); please set a real password or leave it empty",
+			o.Password,
+		))
 	}
 
 	return errs

@@ -1,6 +1,7 @@
 package options
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -42,6 +43,14 @@ func NewPostgreSQLOptions() *PostgreSQLOptions {
 // Validate 验证传递给 PostgreSQLOptions 的标志。
 func (o *PostgreSQLOptions) Validate() []error {
 	errs := []error{}
+
+	// 仅在 Addr 配置了的情况下校验密码——这样不使用 PostgreSQL 的服务无须配置。
+	if o.Addr != "" && IsPlaceholderSecret(o.Password) {
+		errs = append(errs, fmt.Errorf(
+			"postgresql.password looks like a placeholder/known-weak value (%q); please set a real password",
+			o.Password,
+		))
+	}
 
 	return errs
 }

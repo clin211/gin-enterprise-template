@@ -21,10 +21,12 @@ type JWTOptions struct {
 	fullPrefix string
 }
 
-// NewJWTOptions 创建带有默认参数的 JWTOptions 对象。
+// NewJWTOptions 创建一个 JWTOptions 实例。
+// Secret 字段必须由配置文件 / 环境变量 / 命令行显式提供，
+// 这里特意不再写死任何默认值，避免泄漏到生产环境。
 func NewJWTOptions() *JWTOptions {
 	return &JWTOptions{
-		Secret:            "9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8",
+		Secret:            "",
 		AccessExpiration:  2 * time.Hour,
 		RefreshExpiration: 168 * time.Hour, // 7 days
 	}
@@ -35,10 +37,22 @@ func (o *JWTOptions) Validate() []error {
 	var errs []error
 
 	if o.Secret == "" {
-		errs = append(errs, fmt.Errorf("--%s.secret must be specified", o.fullPrefix))
+		errs = append(errs, fmt.Errorf(
+			"--%s.secret must be specified (set via env APP_JWT_SECRET, --jwt.secret flag, or config file)",
+			o.fullPrefix,
+		))
 	}
-	if len(o.Secret) < 6 {
-		errs = append(errs, fmt.Errorf("--%s.secret must be at least 6 characters long", o.fullPrefix))
+	if o.Secret != "" && IsPlaceholderSecret(o.Secret) {
+		errs = append(errs, fmt.Errorf(
+			"--%s.secret looks like a placeholder/known-weak value (%q); please generate a real one (e.g. `openssl rand -hex 32`)",
+			o.fullPrefix, o.Secret,
+		))
+	}
+	if o.Secret != "" && len(o.Secret) < 32 {
+		errs = append(errs, fmt.Errorf(
+			"--%s.secret must be at least 32 characters long (current: %d)",
+			o.fullPrefix, len(o.Secret),
+		))
 	}
 	if o.AccessExpiration <= 0 {
 		errs = append(errs, fmt.Errorf("--%s.access-expiration must be positive", o.fullPrefix))

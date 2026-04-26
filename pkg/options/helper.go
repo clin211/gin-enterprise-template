@@ -63,3 +63,49 @@ func CreateListener(addr string) (net.Listener, int, error) {
 
 	return ln, tcpAddr.Port, nil
 }
+
+// 已知的弱/示例密钥与密码：
+//   - 字符串完全相等命中
+//   - 任何以 placeholderSecretPrefixes 开头的字符串也视为占位符
+//
+// 这些值不应该出现在配置文件中，启动时会被各个 Validate 拒绝。
+var (
+	knownInsecureSecrets = map[string]struct{}{
+		// 历史上写死在仓库里的旧 JWT secret，必须永久禁用
+		"9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8": {},
+		// 常见的弱口令
+		"secret":   {},
+		"password": {},
+		"123456":   {},
+		"admin":    {},
+		"root":     {},
+	}
+	placeholderSecretPrefixes = []string{
+		"CHANGE_ME",
+		"change-me",
+		"changeme",
+		"REPLACE_ME",
+		"replace-me",
+		"replaceme",
+		"YOUR_",
+		"your-",
+		"TODO",
+		"todo",
+		"xxx",
+		"XXX",
+	}
+)
+
+// IsPlaceholderSecret 判断给定字符串是否是已知的占位符 / 示例 / 弱密钥。
+// 用于 *Options.Validate() 中拒绝默认或未替换的敏感配置。
+func IsPlaceholderSecret(s string) bool {
+	if _, bad := knownInsecureSecrets[s]; bad {
+		return true
+	}
+	for _, prefix := range placeholderSecretPrefixes {
+		if strings.HasPrefix(s, prefix) {
+			return true
+		}
+	}
+	return false
+}

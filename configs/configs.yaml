@@ -1,23 +1,55 @@
+# ==============================================================================
+# gin-enterprise-template-apiserver 配置文件
+#
+# 本文件**只持有非敏感的默认值**。所有敏感字段（密钥、密码）必须通过环境
+# 变量注入，避免不慎随 git 提交而泄漏。
+#
+# 程序通过 viper.AutomaticEnv() 自动把环境变量映射到对应配置项：
+#
+#   APP_JWT_SECRET          -> jwt.secret           （必填，≥ 32 字符）
+#   APP_POSTGRESQL_PASSWORD -> postgresql.password  （必填）
+#   APP_REDIS_PASSWORD      -> redis.password       （可空）
+#
+# 启动示例：
+#
+#   APP_JWT_SECRET=$(openssl rand -hex 32) \
+#   APP_POSTGRESQL_PASSWORD=your_pg_pwd \
+#   APP_REDIS_PASSWORD=your_redis_pwd \
+#     ./apiserver -c configs/configs.yaml
+#
+# 完整变量列表与示例值见根目录 .env.example。
+#
+# 如果你**不打算**用环境变量、想直接改 yaml（仅开发环境推荐），请：
+#   1. 把本文件加入 .gitignore（避免误提交）
+#   2. 替换下方所有空字符串字段为真实值
+#   3. 启动时不需要设环境变量
+# ==============================================================================
 http:
-  addr: 0.0.0.0:5557 # 服务监听地址
+  addr: 0.0.0.0:5555 # 服务监听地址（与 README、Dockerfile EXPOSE 保持一致）
 timeout: 30s # 服务端超时
+
 jwt:
-  secret: 9NJE1L0b4Vf2UG8IitQgr0lw0odMu0y8 # jwt 签名密钥
+  # 必填：通过 APP_JWT_SECRET 注入；至少 32 字符随机字符串
+  # 可通过以下方式生成：openssl rand -hex 32
+  secret: ""
   access-expiration: 2h # Access Token 有效期。单位：h(小时)
   refresh-expiration: 168h # Refresh Token 有效期，单位：h(小时)
+
 postgresql:
   addr: 127.0.0.1:5432
-  database: cs-pedia
+  database: template
   username: postgres
-  password: 2eVHeXDmZ5nTDiPb
+  password: ""
   max-idle-connections: 100 # 最大空闲连接数
   max-open-connections: 1000 # 最大打开连接数
   max-connection-life-time: 5m # 连接最大生命周期
   log-level: 4 # 日志级别
-redis: # Redis 数据库相关配置
+
+redis:
+  # Redis 数据库相关配置
   addr: 127.0.0.1:6379 # Redis 服务器地址和端口，默认 127.0.0.1:6379
   username: "" # Redis 用户名（使用默认用户，留空）
-  password: Q6jAu8trwDEcJN7V # Redis 用户密码
+  password: ""
   database: 0 # Redis 数据库索引，默认 0
   max-retries: 3 # 最大重试次数，默认 3
   min-idle-conns: 0 # 最小空闲连接数，默认 0
@@ -27,6 +59,7 @@ redis: # Redis 数据库相关配置
   pool-time: 4s # 连接池超时时间，默认 4s
   pool-size: 10 # 连接池大小，默认 10
   enable-trace: false # 是否启用链路追踪，默认 false
+
 otel:
   endpoint: 127.0.0.1:4327
   service-name: gin-enterprise-template-apiserver
@@ -35,7 +68,7 @@ otel:
   add-source: true
   use-prometheus-endpoint: true
   slog:
-    # 改配置项只有 output-mod 为 slog 时生效
+    # 该配置项只有 output-mode 为 slog 时生效
     format: json
     time-format: "2006-01-02 15:04:05"
-    output: ./_output/im-apiserver.log # 支持 stdout, stderr, or file path
+    output: ./_output/apiserver.log # 支持 stdout, stderr, or file path

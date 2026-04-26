@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/clin211/gin-enterprise-template/pkg/core"
 	"github.com/clin211/gin-enterprise-template/pkg/version"
@@ -15,16 +16,42 @@ import (
 	"github.com/clin211/gin-enterprise-template/cmd/gin-enterprise-template-apiserver/app/options"
 )
 
-const (
-	// defaultHomeDir 定义存储 gin-enterprise-template-apiserver 服务配置的默认目录。
-	defaultHomeDir = ".gin-enterprise-template"
-
-	// defaultConfigName 指定 gin-enterprise-template-apiserver 服务的默认配置文件名。
-	defaultConfigName = "gin-enterprise-template-apiserver.yaml"
+// defaultHomeDir 与 defaultConfigName 在程序启动时基于 os.Args[0] 动态推导，
+// 而不是硬编码字符串。这样让本模板被 fork / 通过 forge 重命名后无需手动改源码。
+//
+// 例如：
+//
+//	$ ls ~/.demo-api-apiserver/
+//	demo-api-apiserver.yaml
+//
+// 任何下游使用者编译出新的二进制名（如 demo-api-apiserver）后，配置目录与
+// 文件名会自动跟随该名字变化，避免「为什么找不到默认配置」这类常见困惑。
+var (
+	defaultHomeDir    = computeDefaultHomeDir()
+	defaultConfigName = computeDefaultConfigName()
 )
 
 // 配置文件的路径
 var configFile string
+
+// computeBinaryName 提取当前可执行文件名（去除路径与 .exe 后缀），
+// 并在异常情况下退化为 "apiserver" 兜底。
+func computeBinaryName() string {
+	binary := filepath.Base(os.Args[0])
+	binary = strings.TrimSuffix(binary, ".exe")
+	if binary == "" || binary == "." || binary == "/" {
+		return "apiserver"
+	}
+	return binary
+}
+
+func computeDefaultHomeDir() string {
+	return "." + computeBinaryName()
+}
+
+func computeDefaultConfigName() string {
+	return computeBinaryName() + ".yaml"
+}
 
 // NewWebServerCommand 创建用于启动应用程序的 *cobra.Command 对象。
 func NewWebServerCommand() *cobra.Command {
@@ -71,8 +98,13 @@ func NewWebServerCommand() *cobra.Command {
 		Args: cobra.NoArgs,
 	}
 
-	// 初始化配置函数，在每个命令运行时调用
-	cobra.OnInitialize(core.OnInitialize(&configFile, "MINIBLOG-V4_APISERVER", searchDirs(), defaultConfigName))
+	// 初始化配置函数，在每个命令运行时调用。
+	// envPrefix 必须只含 [A-Z0-9_]，否则 shell 无法设置该前缀的环境变量。
+	// 配合 viper.AutomaticEnv()，所有 yaml 配置项都可被环境变量覆盖：
+	//   APP_JWT_SECRET            → jwt.secret
+	//   APP_POSTGRESQL_PASSWORD   → postgresql.password
+	//   APP_REDIS_PASSWORD        → redis.password
+	cobra.OnInitialize(core.OnInitialize(&configFile, "APP", searchDirs(), defaultConfigName))
 
 	// cobra 支持持久标志，适用于指定命令及其所有子命令。
 	// 建议使用配置文件进行应用程序配置，以便更轻松地管理配置项。

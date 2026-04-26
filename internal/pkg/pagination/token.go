@@ -124,11 +124,11 @@ func DecodeCursor(tokenStr string) (*Cursor, error) {
 	}
 	b, err := base64.URLEncoding.DecodeString(tokenStr)
 	if err != nil {
-		return nil, errors.New("invalid page_token format")
+		return nil, fmt.Errorf("invalid page_token format: %w", err)
 	}
 	var t PageToken
 	if err := json.Unmarshal(b, &t); err != nil {
-		return nil, errors.New("invalid page_token payload")
+		return nil, fmt.Errorf("invalid page_token payload: %w", err)
 	}
 	if t.Fields == nil {
 		return nil, nil

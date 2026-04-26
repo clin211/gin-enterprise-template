@@ -171,6 +171,14 @@ func GenerateCspediaModels(g *gen.Generator) {
 	g.GenerateModelAs("user_config", "UserConfigM")
 	g.GenerateModelAs("user_login_log", "UserLoginLogM")
 
+	// RBAC 权限控制表
+	g.GenerateModelAs("role", "RoleM")
+	g.GenerateModelAs("user_role", "UserRoleM")
+	g.GenerateModelAs("permission", "PermissionM")
+	g.GenerateModelAs("role_permission", "RolePermissionM")
+	g.GenerateModelAs("menu", "MenuM")
+	g.GenerateModelAs("audit_log", "AuditLogM")
+
 	// 权限控制表
 	g.GenerateModelAs("casbin_rule", "CasbinRuleM")
 }
