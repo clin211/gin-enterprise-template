@@ -45,3 +45,6 @@ go.work.sum
 # 自定义文件
 /_output
 /data
+
+# 编译产物
+gin-enterprise-template-apiserver

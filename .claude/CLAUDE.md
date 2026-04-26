@@ -133,7 +133,8 @@ Model   (数据库模型) -> internal/apiserver/model/
 
 * 类型：资源的类型名称，例如 Post，使用大写驼峰格式；
 * 单数：资源的单数形式，例如 post，使用小写驼峰格式，首字母小写；
-* 复数：资源的复数形式，例如 posts，使用小写驼峰格式，首字母小写。
+* 复数：资源的复数形式，例如 posts，使用小写驼峰格式，首字母小写；
+* 文件命名：除了生成的文件外，所有文件夹、文件名都采用小写字母拼接，不要有特殊字符；
 
 这里假设需要新增一个 Comment 资源，用来记录博客的评论，并将这些记录保存在数据库中。可以按以下顺序来实现 Comment 资源相关的功能代码：
 
@@ -145,6 +146,7 @@ Model   (数据库模型) -> internal/apiserver/model/
 6. 实现 `Comment` 资源的 `Store` 层代码（在文件 `internal/apiserver/store/comment.go` 中实现）；
 7. 实现 `Comment` 资源的 `Model` 和 `Proto` 的转换函数（在 `internal/apiserver/pkg/conversion/comment.go` 文件中实现）；
 8. 实现 `Comment` 资源的 `Biz` 层代码（在文件 `internal/apiserver/biz/v1/comment/comment.go` 中实现）；
+   * 每一个接口都是一个独立的文件（比如： create.go、update.go、delete.go、refreshtoken.go）
 9. 实现 `Comment` 资源的 `Handler` 层代码（在文件 `internal/apiserver/handler/comment.go` 中实现）。
 
 > 推荐按顺序执行，每步完成后进行单元测试。
