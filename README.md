@@ -1,5 +1,18 @@
 # Project gin-enterprise-template
 
+> **安全提示（必读）**
+>
+> 本仓库 `configs/configs.yaml` 中的密钥与密码字段是占位符（`CHANGE_ME_*`），并非可用值。
+> **首次部署到任何环境（开发/测试/生产）前必须替换：**
+>
+> - `jwt.secret`：用 `openssl rand -hex 32` 生成（≥ 32 字符）
+> - `postgresql.password` / `redis.password`：改为强密码或通过环境变量注入
+>
+> 程序启动时会校验默认/弱 secret 并直接拒绝运行（参见 `pkg/options/jwt_options.go`）。
+>
+> 完整 fork 后清单见 [`docs/FORK-CHECKLIST.md`](./docs/FORK-CHECKLIST.md)。
+> 改进路线见 [`docs/template-improvements.md`](./docs/template-improvements.md)。
+
 gin-enterprise-template 是一个基于 Go 语言开发的现代化知识库管理系统，采用简洁架构设计，具有代码质量高、扩展能力强、符合 Go 编码及最佳实践等特点。基于 Go 语言开发的现代化微服务应用，采用简洁架构设计，具有代码质量高、扩展能力强、符合 Go 编码及最佳实践等特点。
 
 gin-enterprise-template 具有以下特性：
@@ -311,7 +324,7 @@ curl -X POST http://localhost:5556/v1/users \
   }'
 
 # 用户登录
-curl -X POST http://localhost:5556/login \
+curl -X POST http://localhost:5556/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",

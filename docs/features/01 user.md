@@ -398,7 +398,7 @@ authn.Encrypt(用户输入的明文密码)
 }
 ```
 
-**注意**: 返回结构与 `/login` 完全一致，便于前端统一处理。
+**注意**: 返回结构与 `/v1/auth/login` 完全一致，便于前端统一处理。
 
 #### 中间件说明
 
@@ -640,7 +640,7 @@ if err := eg.Wait(); err != nil {
 
 **请求**:
 ```bash
-PUT /refresh-token
+PUT /v1/auth/refresh-token
 Authorization: Bearer <refresh_token>
 Content-Type: application/json
 ```
